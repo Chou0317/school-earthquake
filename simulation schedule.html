@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>地震模擬排程</title>
+<style>
+:root{
+  --bg:#6c6c6c;
+  --card:#ffffff;
+  --primary:#002b88;
+  --primary-light:#3b82f6;
+  --secondary-light:#60a5fa;
+  --danger:#ef4444;
+  --muted:#6b7280;
+  --shadow:0 6px 18px rgba(15,23,42,0.08);
+  --radius:12px;
+  font-family:-apple-system, BlinkMacSystemFont,'Segoe UI', Roboto,'Noto Sans TC','Microsoft JhengHei',sans-serif;
+}
+html,body{ 
+    height:100%; 
+    margin:0; 
+    background:var(--bg); 
+}
+body{ 
+    padding:24px; 
+    display:flex; 
+    justify-content:center; 
+}
+
+.card{ 
+    width:100%; 
+    max-width:980px; 
+    background:var(--card); 
+    border-radius:var(--radius); 
+    box-shadow:var(--shadow); 
+    overflow:hidden; 
+    margin-top:20px; 
+}
+
+.header{ 
+    display:flex; 
+    align-items:center; 
+    justify-content:space-between; 
+    gap:12px; 
+    padding:16px 20px; 
+    background:var(--primary); 
+    color:white; 
+}
+
+.title{ 
+    font-size:20px; 
+    font-weight:600; 
+}
+
+.search-row { 
+    display:flex; 
+    align-items:center; 
+    gap:12px; 
+    padding:12px 20px; 
+    background:#f9fafb; 
+    border-radius:8px; 
+    margin:0 16px 12px 16px; 
+    flex-wrap:wrap; 
+}
+
+.search-row .form-group{ 
+    display:flex; 
+    align-items:center; 
+    gap:6px; 
+}
+
+.search-row label{ 
+    font-size:15px; 
+    font-weight:500; 
+    color:var(--muted); 
+    white-space:nowrap; 
+    line-height:32px; 
+}
+
+.search-row input, .search-row select{ 
+    height:32px; 
+    padding:4px 8px; 
+    border-radius:6px; 
+    border:1px solid #ccc; 
+    font-size:14px; 
+    background:#fff; 
+    -webkit-appearance:none; 
+    -moz-appearance:none; 
+    appearance:none; 
+}
+
+.btn-search{ 
+    height:32px; 
+    padding:0 14px; 
+    border-radius:6px; 
+    background:var(--primary-light); 
+    color:#fff; 
+    border:none; 
+    cursor:pointer; 
+    font-weight:600; 
+    font-size:14px; 
+    display:flex; 
+    align-items:center; 
+    justify-content:center; 
+}
+
+.btn-close{
+    height:32px;
+    padding:0 16px;
+    border-radius:6px;
+    border:1px solid #ccc;
+    background:#ffffff;
+    color:#374151;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.add-btn{ 
+    height:32px; 
+    padding:0 16px; 
+    border-radius:6px; 
+    background:var(--secondary-light); 
+    color:white; 
+    border:none; 
+    cursor:pointer; 
+    font-weight:600; 
+    font-size:14px; 
+    display:flex; 
+    align-items:center; 
+    justify-content:center; 
+}
+
+.list{ 
+    width:100%; 
+    border-top:1px solid #eee; 
+    border-bottom:1px solid #eee; 
+    margin-top:0; 
+}
+
+.list-head{ 
+    display:flex; 
+    gap:12px; 
+    padding:10px 8px; 
+    align-items:center; 
+    color:var(--muted); 
+    font-weight:700; 
+    background:#f9fafb; 
+}
+
+.list-row{ 
+    display:flex; 
+    align-items:center; 
+    gap:12px; 
+    padding:12px 8px; 
+    border-bottom:1px solid #f2f2f2; 
+}
+
+.col-1{ 
+    width:60px; 
+    flex-shrink:0; 
+    text-align:center; 
+    color:var(--muted); 
+}
+
+.col-2,.col-3,.col-4{ 
+    flex:1; 
+    min-width:140px; 
+}
+
+.col-5{ 
+    width:120px; 
+    flex-shrink:0; 
+    text-align:center; 
+}
+
+.col-6,.col-7{ 
+    width:90px; 
+    flex-shrink:0; 
+    text-align:center; 
+}
+
+.icon-btn{ 
+    padding:6px 8px; 
+    border-radius:8px; 
+    border:1px solid rgba(0,0,0,0.06); 
+    background:transparent; 
+    cursor:pointer; 
+    font-weight:600; 
+}
+
+.empty{ 
+    padding:28px; 
+    text-align:center; 
+    color:var(--muted); 
+}
+
+.modal-backdrop{ 
+    position:fixed; 
+    inset:0; 
+    background:rgba(2,6,23,0.45); 
+    display:none; 
+    align-items:center; 
+    justify-content:center; 
+    z-index:100; 
+}
+
+.modal{ 
+    background:var(--card); 
+    border-radius:var(--radius); 
+    padding:0; 
+    max-width:640px; 
+    width:92%; 
+    box-shadow:var(--shadow); 
+    overflow:hidden; 
+}
+
+.modal-header{ 
+    padding:16px 20px; 
+    background:var(--primary); 
+    color:white; 
+    font-size:18px; 
+    font-weight:600; 
+}
+
+.modal-body{ 
+    padding:18px; 
+    color:#111; 
+    max-height:60vh; 
+    overflow:auto; 
+    display:flex; 
+    flex-direction:column; 
+    gap:12px; 
+}
+
+.modal-body input, .modal-body select{ 
+    height:32px; 
+    padding:4px 8px; 
+    border-radius:6px; 
+    border:1px solid #ccc; 
+    font-size:14px; 
+}
+
+.modal-footer{ 
+    display:flex; 
+    gap:8px; 
+    justify-content:flex-end; 
+    padding:12px 18px; 
+    background:#f9fafb; 
+}
+
+#topBtn{ 
+    position:fixed; 
+    right:20px; 
+    bottom:20px; 
+    width:44px; 
+    height:44px; 
+    background:var(--primary-light); 
+    color:white; 
+    border:none; 
+    border-radius:8px; 
+    display:none; 
+    align-items:center; 
+    justify-content:center; 
+    cursor:pointer; 
+    z-index:200; 
+}
+
+#topBtn:hover{ 
+    background:#0056b3; 
+}
+
+@media (max-width:720px){
+  .list-head{ font-size:13px; }
+  .col-2,.col-3,.col-4{ min-width:80px; }
+  .search-row{ gap:8px; }
+}
+</style>
+</head>
+<body>
+<div class="card" id="mainCard">
+  <div class="header">
+    <div class="title">地震模擬排程</div>
+    <button class="add-btn" onclick="openAddModal()">+ 新增排程</button>
+  </div>
+
+  <!-- 搜尋列 -->
+  <div class="search-row" role="search" aria-label="搜尋排程">
+    <div class="form-group">
+      <label for="themeInput">主題</label>
+      <input type="text" id="themeInput" placeholder="輸入演練主題">
+    </div>
+    <div class="form-group">
+      <label>開始日期</label>
+      <input type="date" id="startDate" onchange="updateEndMin()">
+    </div>
+    <div class="form-group">
+      <label>結束日期</label>
+      <input type="date" id="endDate" onchange="updateStartMax()">
+    </div>
+    <button class="btn-search" onclick="searchSchedules()">搜尋</button>
+  </div>
+
+  <div id="countText" style="padding:8px 20px;color:var(--muted)">共 0 筆資料</div>
+
+  <div class="list" aria-live="polite">
+    <div class="list-head">
+      <div class="col-1">序號</div>
+      <div class="col-2">名稱</div>
+      <div class="col-3">演練主題</div>
+      <div class="col-4">演練時間</div>
+      <div class="col-5">演練震度</div>
+      <div class="col-6">編輯</div>
+      <div class="col-7">刪除</div>
+    </div>
+    <div id="rowsContainer"><div class="empty">載入中...</div></div>
+  </div>
+</div>
+
+<!-- Modal 新增/編輯排程 -->
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal" role="document" aria-labelledby="modalTitle">
+    <div class="modal-header" id="modalTitle">新增排程</div>
+    <div class="modal-body" id="modalBody">
+      <div class="form-group">
+        <label for="newTheme">主題</label>
+        <input type="text" id="newTheme" placeholder="輸入主題">
+      </div>
+      <div class="form-group">
+        <label for="newLocation">地點</label>
+        <select id="newLocation"></select>
+      </div>
+      <div class="form-group">
+        <label for="newMagnitude">震度</label>
+        <select id="newMagnitude"></select>
+      </div>
+      <div class="form-group">
+        <label>時間</label>
+        <input type="datetime-local" id="newDate">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-search" onclick="saveSchedule()">儲存</button>
+      <button class="btn-close" onclick="closeModal()">關閉</button>
+    </div>
+  </div>
+</div>
+
+<button id="topBtn" onclick="scrollToTop()">TOP</button>
+
+<script>
+let locations = ['台北市','新北市','桃園市','台中市','台南市','高雄市'];
+let schedules = [
+  {id:'S1', name:'群組A', theme:'避難演練', time:'2025-12-22T09:00', magnitude:'3級', location:'台北市'},
+  {id:'S2', name:'群組B', theme:'強震模擬', time:'2025-12-23T14:30', magnitude:'5強', location:'台中市'}
+];
+
+function populateLocations(){
+  const locSelect = document.getElementById('newLocation');
+  locSelect.innerHTML='<option value="">-</option>';
+  locations.forEach(loc=>{
+    const opt=document.createElement('option');
+    opt.value=loc; opt.textContent=loc;
+    locSelect.appendChild(opt);
+  });
+}
+
+function populateMagnitudes(){
+  const magSelect = document.getElementById('newMagnitude');
+  const mags=['1級','2級','3級','4級','5弱','5強','6弱','6強','7級'];
+  magSelect.innerHTML='<option value="">-</option>';
+  mags.forEach(m=>{
+    const opt=document.createElement('option');
+    opt.value=m; opt.textContent=m;
+    magSelect.appendChild(opt);
+  });
+}
+
+const rowsContainer=document.getElementById('rowsContainer');
+const countText=document.getElementById('countText');
+
+function render(list){
+  rowsContainer.innerHTML='';
+  if(!list||list.length===0){
+    rowsContainer.innerHTML='<div class="empty">查無資料</div>';
+    countText.textContent='共 0 筆資料';
+    return;
+  }
+  countText.textContent='共 '+list.length+' 筆資料';
+  list.forEach((e,idx)=>{
+    const row=document.createElement('div');
+    row.className='list-row';
+    row.innerHTML=`
+      <div class="col-1">${idx+1}</div>
+      <div class="col-2">${e.name}</div>
+      <div class="col-3">${e.theme}</div>
+      <div class="col-4">${e.time.replace('T',' ')}</div>
+      <div class="col-5">${e.magnitude}</div>
+      <div class="col-6"><button class="icon-btn" onclick="editSchedule('${e.id}')">編輯</button></div>
+      <div class="col-7"><button class="icon-btn" onclick="deleteSchedule('${e.id}')">刪除</button></div>
+    `;
+    rowsContainer.appendChild(row);
+  });
+}
+
+function searchSchedules(){
+  const themeVal = document.getElementById('themeInput').value.trim().toLowerCase();
+  const start = document.getElementById('startDate').value;
+  const end = document.getElementById('endDate').value;
+  let filtered = schedules.filter(s=>{
+    let matchTheme = themeVal==='' || s.theme.toLowerCase().includes(themeVal);
+    let matchTime = (!start || s.time>=start) && (!end || s.time<=end+'T23:59');
+    return matchTheme && matchTime;
+  });
+  render(filtered);
+}
+
+const modalBackdrop=document.getElementById('modalBackdrop');
+
+function openAddModal(){
+  editingId=null;
+  document.getElementById('modalTitle').textContent='新增排程';
+  document.getElementById('newTheme').value='';
+  document.getElementById('newLocation').value='';
+  document.getElementById('newMagnitude').value='';
+  document.getElementById('newDate').value='';
+  populateLocations();
+  populateMagnitudes();
+  openModal();
+}
+
+let editingId=null;
+function editSchedule(id){
+  const s=schedules.find(x=>x.id===id);
+  if(!s) return;
+  editingId=id;
+  document.getElementById('modalTitle').textContent='編輯排程';
+  document.getElementById('newTheme').value=s.theme;
+  document.getElementById('newLocation').value=s.location;
+  document.getElementById('newMagnitude').value=s.magnitude;
+  document.getElementById('newDate').value=s.time;
+  populateLocations();
+  populateMagnitudes();
+  openModal();
+}
+
+function saveSchedule(){
+  const theme=document.getElementById('newTheme').value.trim();
+  const location=document.getElementById('newLocation').value;
+  const magnitude=document.getElementById('newMagnitude').value;
+  const time=document.getElementById('newDate').value;
+  if(!theme||!location||!magnitude||!time) return alert('請完整填寫資料');
+  if(editingId){
+    const idx=schedules.findIndex(s=>s.id===editingId);
+    schedules[idx].theme=theme;
+    schedules[idx].location=location;
+    schedules[idx].magnitude=magnitude;
+    schedules[idx].time=time;
+    editingId=null;
+  }else{
+    const newId='S'+(schedules.length+1);
+    schedules.push({id:newId,name:'群組X',theme,location,magnitude,time});
+  }
+  render(schedules);
+  closeModal();
+}
+
+function deleteSchedule(id){
+  if(confirm('確定要刪除此排程嗎？')){
+    schedules=schedules.filter(s=>s.id!==id);
+    render(schedules);
+  }
+}
+
+function openModal(){ modalBackdrop.style.display='flex'; modalBackdrop.setAttribute('aria-hidden','false'); }
+function closeModal(){ modalBackdrop.style.display='none'; modalBackdrop.setAttribute('aria-hidden','true'); }
+modalBackdrop.addEventListener('click',(ev)=>{if(ev.target===modalBackdrop) closeModal();});
+
+const topBtn=document.getElementById('topBtn');
+window.addEventListener('scroll',()=>{topBtn.style.display=(window.scrollY>120)?'flex':'none';});
+function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
+
+// 搜尋日期互動限制
+function updateEndMin(){
+  const start = document.getElementById('startDate').value;
+  const endInput = document.getElementById('endDate');
+  if(start) endInput.min = start;
+}
+function updateStartMax(){
+  const end = document.getElementById('endDate').value;
+  const startInput = document.getElementById('startDate');
+  if(end) startInput.max = end;
+}
+
+(function init(){
+  populateLocations(); populateMagnitudes();
+  render(schedules);
+})();
+</script>
+</body>
+</html>
