@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>氣象署連線設定</title>
+
+<style>
+:root{
+  --bg:#6c6c6c;
+  --card:#ffffff;
+  --primary:#002b88;
+  --primary-light:#3b82f6;
+  --muted:#6b7280;
+  --shadow:0 6px 18px rgba(15,23,42,0.08);
+  --radius:12px;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans TC','Microsoft JhengHei',sans-serif;
+}
+
+html,body{
+  height:100%;
+  margin:0;
+  background:var(--bg);
+}
+
+body{
+  padding:24px;
+  display:flex;
+  justify-content:center;
+}
+
+/* ================= 卡片 ================= */
+.card{
+  width:100%;
+  max-width:980px;
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+/* ================= Header ================= */
+.header{
+  padding:16px 20px;
+  background:var(--primary);
+  color:#fff;
+  font-size:20px;
+  font-weight:600;
+}
+
+/* ================= 搜尋列 ================= */
+.search-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  padding:12px 20px;
+  background:#f9fafb;
+}
+
+.form-group{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+label{
+  color:var(--muted);
+  white-space:nowrap;
+}
+
+select,input{
+  height:32px;
+  padding:4px 8px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  font-size:14px;
+}
+
+.btn-search{
+  height:32px;
+  padding:0 14px;
+  border:none;
+  border-radius:6px;
+  background:var(--primary-light);
+  color:#fff;
+  cursor:pointer;
+  font-weight:600;
+}
+
+/* ================= 列表 ================= */
+.list{
+  border-top:1px solid #eee;
+}
+
+.list-head,.list-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 8px;
+}
+
+.list-head{
+  background:#f9fafb;
+  color:var(--muted);
+  font-weight:700;
+}
+
+.list-row{
+  border-bottom:1px solid #f2f2f2;
+}
+
+.col-1{width:60px;text-align:center;}
+.col-2,.col-3{flex:1;}
+.col-4,.col-5{width:120px;text-align:center;}
+.col-6{width:140px;text-align:center;}
+
+.icon-btn{
+  padding:6px 10px;
+  border-radius:8px;
+  border:1px solid rgba(0,0,0,0.1);
+  background:#fff;
+  cursor:pointer;
+  font-weight:600;
+}
+
+/* ================= modal ================= */
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+}
+
+.modal{
+  background:#fff;
+  width:92%;
+  max-width:520px;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+.modal-header{
+  background:var(--primary);
+  color:#fff;
+  padding:14px 18px;
+  font-weight:600;
+}
+
+.modal-body{
+  padding:18px;
+}
+
+.modal-body .form-group{
+  margin-bottom:12px;
+}
+
+.modal-footer{
+  padding:12px 18px;
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  background:#f9fafb;
+}
+
+.btn{
+  padding:6px 14px;
+  border-radius:6px;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.btn-primary{background:var(--primary-light);color:#fff;}
+.btn-cancel{background:#e5e7eb;}
+
+/* ================= TOP BTN ================= */
+#topBtn{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  width:44px;
+  height:44px;
+  border:none;
+  border-radius:8px;
+  background:var(--primary-light);
+  color:#fff;
+  display:none;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <div class="header">氣象署連線設定</div>
+
+  <!-- 搜尋 -->
+  <div class="search-row">
+    <div class="form-group">
+      <label>縣市</label>
+      <select id="citySelect"></select>
+    </div>
+    <div class="form-group">
+      <label>鄉鎮</label>
+      <select id="townSelect"></select>
+    </div>
+    <div class="form-group">
+      <label>ID</label>
+      <input id="idInput" />
+    </div>
+    <div class="form-group">
+      <label>名稱</label>
+      <input id="nameInput" />
+    </div>
+    <button class="btn-search" onclick="search()">搜尋</button>
+  </div>
+
+  <div id="countText" style="padding:8px 20px;color:var(--muted)">共 0 筆資料</div>
+
+  <!-- 列表 -->
+  <div class="list">
+    <div class="list-head">
+      <div class="col-1">序號</div>
+      <div class="col-2">ID</div>
+      <div class="col-3">名稱</div>
+      <div class="col-4">縣市</div>
+      <div class="col-5">鄉鎮</div>
+      <div class="col-6">氣象署連線</div>
+    </div>
+    <div id="rows"></div>
+  </div>
+</div>
+
+<!-- modal -->
+<div class="modal-backdrop" id="modal">
+  <div class="modal">
+    <div class="modal-header">氣象署連線設定</div>
+    <div class="modal-body">
+      <div class="form-group"><label>ID</label><input id="mId" disabled></div>
+      <div class="form-group"><label>名稱</label><input id="mName" disabled></div>
+      <div class="form-group"><label>氣象署帳號</label><input></div>
+      <div class="form-group"><label>氣象署密碼</label><input type="password"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary">送出</button>
+    </div>
+  </div>
+</div>
+
+<button id="topBtn" onclick="scrollToTop()">TOP</button>
+
+<script>
+const data=[
+ {id:'S001',name:'測站A',city:'台北市',town:'內湖區'},
+ {id:'S002',name:'測站B',city:'新北市',town:'板橋區'}
+];
+
+const rows=document.getElementById('rows');
+const countText=document.getElementById('countText');
+
+function render(list){
+ rows.innerHTML='';
+ countText.textContent=`共 ${list.length} 筆資料`;
+ list.forEach((e,i)=>{
+  const r=document.createElement('div');
+  r.className='list-row';
+  r.innerHTML=`
+   <div class="col-1">${i+1}</div>
+   <div class="col-2">${e.id}</div>
+   <div class="col-3">${e.name}</div>
+   <div class="col-4">${e.city}</div>
+   <div class="col-5">${e.town}</div>
+   <div class="col-6">
+     <button class="icon-btn" onclick="openModal('${e.id}','${e.name}')">設定</button>
+   </div>`;
+  rows.appendChild(r);
+ });
+}
+
+function openModal(id,name){
+ document.getElementById('mId').value=id;
+ document.getElementById('mName').value=name;
+ document.getElementById('modal').style.display='flex';
+}
+function closeModal(){document.getElementById('modal').style.display='none';}
+
+window.addEventListener('scroll',()=>{
+ document.getElementById('topBtn').style.display=window.scrollY>120?'block':'none';
+});
+function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
+
+render(data);
+</script>
+</body>
+</html>
