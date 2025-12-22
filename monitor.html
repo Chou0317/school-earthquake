@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>即時監控</title>
+
+<!-- 全域樣式區：定義顏色、圓角、陰影及字型等變數，方便統一調整樣式 -->
+<style>
+:root{
+  --bg: #6c6c6c;             /* 頁面背景色 */ 
+  --card: #ffffff;           /* 卡片底色 */ 
+  --primary: #002b88;        /* 主色（深） */
+  --primary-light: #3b82f6;  /* 主色（淺） */
+  --danger: #ef4444;         /* 危險/錯誤色 */
+  --muted: #6b7280;          /* 次文字色 */
+  --shadow: 0 6px 18px rgba(15,23,42,0.08);  /* 預設陰影 */
+  --radius: 12px;              /* 元件圓角 */
+  /* 字型順序：系統字型 -> 中文常用字型 */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+}
+
+/* 基本頁面設定：置中卡片、背景顏色 */
+html,body{margin:0; background:var(--bg);}
+body{ 
+    display:flex; 
+    flex-direction:column; 
+    align-items:center; 
+    padding:24px; 
+}
+
+/* 卡片容器（整頁只有一個主要卡片） */
+.card{ 
+    width:100%; 
+    max-width:1200px; 
+    background:var(--card); 
+    border-radius:var(--radius); 
+    box-shadow:var(--shadow); 
+    box-sizing:border-box; 
+    overflow:hidden;        /* 避免子元素超出視覺 */
+    margin-bottom:24px; 
+}
+
+/* 卡片標頭：標題 + 可放按鈕 */
+.header{ 
+    display:flex; 
+    align-items:center; 
+    justify-content:space-between; 
+    gap:12px; 
+    padding:16px 20px; 
+    background:var(--primary); 
+    color:white; 
+}
+
+/* 標題字型 */
+.title{ 
+    font-size:20px; 
+    font-weight:600; 
+}
+
+/* 篩選列：縣市、鄉鎮下拉 */
+.select-row{ 
+    display:flex; 
+    gap:12px; 
+    padding:12px 20px; 
+    align-items:center; 
+    flex-wrap:wrap;  /* 手機寬度會換列 */
+}
+
+.select-row select{ 
+    padding:6px 10px; 
+    border-radius:8px; 
+    border:1px solid #e6e6e6; 
+}
+
+/* 顯示資料筆數 */
+.stats{ 
+    padding:0 20px 12px; 
+    color:var(--muted); 
+    font-size:14px; 
+}
+
+/* 表格容器（整個表格會隨資料長度向下延伸） */
+.list{ 
+    width:100%; 
+    border-top:1px solid #eee; 
+    border-bottom:1px solid #eee; 
+}
+
+/* 每列樣式（標頭與資料列共用） */
+.list-row, .list-head{ 
+    display:flex; 
+    align-items:center; 
+    gap:12px; padding:10px 8px; 
+    box-sizing:border-box; 
+    flex-shrink:0; 
+}
+
+/* 表頭：粗體、底色，並在視窗頂端 sticky（可視需求移除） */
+.list-head{ 
+    font-weight:700; 
+    color:var(--muted); 
+    background:#f9fafb; 
+    position:sticky; top:0; 
+    z-index:1; 
+}
+
+/* 一般資料列底線分隔 */
+.list-row{ 
+    border-bottom:1px solid #f2f2f2; 
+    font-size:14px; 
+}
+
+/* 各欄位寬度設定（可依內容調整） */
+.col-1{
+    width:50px; 
+    text-align:center; 
+    flex-shrink:0;
+} 
+
+.col-2{
+    width:80px; 
+    text-align:center; 
+    flex-shrink:0;
+}
+
+.col-3{
+    width:80px; 
+    text-align:center; 
+    flex-shrink:0;
+}
+
+/* 站台名稱使用彈性寬度 */
+.col-4{
+    width:100px; 
+    flex:1;
+}
+
+.col-5,.col-6,.col-7,.col-8,.col-9,.col-10,.col-11,.col-12{
+    width:80px; 
+    text-align:center; 
+    flex-shrink:0;
+}
+
+/* 空白提示樣式 */
+.empty{
+    padding:28px;
+    text-align:center;
+    color:var(--muted);
+}
+
+/* 右下角 Top 按鈕（預設隱藏） */
+#topBtn{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    padding:10px 14px;
+    border:none;
+    border-radius:8px;
+    background:var(--primary-light);
+    color:white;
+    cursor:pointer;
+    display:none;
+    box-shadow:var(--shadow);
+    z-index:10;
+}
+
+/* modal（明細視窗）樣式 */
+.modal-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(2,6,23,0.45);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    display:none;
+    z-index:1000;
+}
+
+.modal{ 
+    background:var(--card); 
+    border-radius:var(--radius); 
+    padding:0; max-width:560px; 
+    width:92%; 
+    box-shadow:var(--shadow); 
+    overflow:hidden; 
+}
+
+.modal-header{ 
+    padding:16px 20px; 
+    background:var(--primary); 
+    color:white; 
+    font-size:18px; 
+    font-weight:600; 
+}
+
+.modal-body{ 
+    padding:18px; 
+}
+
+.modal-footer{ 
+    display:flex; 
+    gap:8px; 
+    justify-content:flex-end; 
+    padding:12px 18px; 
+    background:#f9fafb; 
+}
+
+/* 通用按鈕樣式 */
+.btn{ 
+    border:0; 
+    padding:8px 12px; 
+    border-radius:8px; 
+    cursor:pointer; 
+    font-weight:600; 
+    font-size:14px; 
+}
+
+.btn-primary{
+    background:var(--primary-light); 
+    color:white;
+}
+
+.btn-ghost{
+    background:transparent; 
+    color:var(--primary); 
+    border:1px solid var(--primary);
+}
+
+.btn-detail {
+  padding:6px 8px;                    /* 與 icon-btn 相同 */
+  border-radius:8px;                  /* 圓角 */
+  border:1px solid rgba(0,0,0,0.06); /* 淺邊框 */
+  background:transparent;             /* 透明底 */
+  cursor:pointer;
+  font-weight:600;
+  font-size:14px;
+}
+
+/* 狀態圓圈 */
+.status-circle{
+  display:inline-block;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  margin:auto;
+}
+.status-online{background:#22c55e;} /* 綠色 */
+.status-offline{background:#ef4444;} /* 紅色 */
+</style>
+</head>
+<body>
+
+<!-- ========== 主卡片（UI） ========== -->
+<div class="card" role="region" aria-label="即時監控卡片">
+  <div class="header">
+    <div class="title">即時監控</div>
+  </div>
+
+  <!-- 篩選下拉：縣市 / 鄉鎮 -->
+  <div class="select-row">
+    <label>縣市:
+      <select id="citySelect">
+        <option value="">全部</option>
+        <option value="臺北市">臺北市</option>
+        <option value="新北市">新北市</option>
+      </select>
+    </label>
+    <label>鄉鎮:
+      <select id="townSelect">
+        <option value="">全部</option>
+        <option value="中正區">中正區</option>
+        <option value="信義區">信義區</option>
+      </select>
+    </label>
+  </div>
+  
+  <!-- 顯示總筆數 -->
+  <div class="stats" id="stats">共 0 筆資料</div>
+  
+   <!-- 列表容器：若資料很多，頁面會向下延伸（外部滾動） -->
+  <div class="list" id="rowsContainer">
+     <!-- list head：表格欄位標題 -->
+    <div class="list-head">
+      <div class="col-1">序號</div>
+      <div class="col-2">站台ID</div>
+      <div class="col-3">縣市</div>
+      <div class="col-4">鄉鎮</div>
+      <div class="col-5">站台名稱</div>
+      <div class="col-6">TCP</div>
+      <div class="col-7">中保防災</div>
+      <div class="col-8">氣象</div>
+      <div class="col-9">DIO1</div>
+      <div class="col-10">DIO2</div>
+      <div class="col-11">DIO3</div>
+      <div class="col-12">明細</div>
+    </div>
+    <!-- 初始空提示（會由 JS render 覆蓋） -->
+    <div class="empty">目前沒有資料。</div>
+  </div>
+</div>
+
+<!-- 右下角 Top 按鈕 -->
+<button id="topBtn">Top</button>
+
+<div class="modal-backdrop" id="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-header" id="modalTitle">明細</div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="closeModal">關閉</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========= JavaScript：資料管理、render 與互動 ========= -->
+<script>
+/* 取得 DOM 節點（放在變數方便重複使用） */
+const rowsContainer = document.getElementById('rowsContainer');
+const stats = document.getElementById('stats');
+const citySelect = document.getElementById('citySelect');
+const townSelect = document.getElementById('townSelect');
+const topBtn = document.getElementById('topBtn');
+
+const modal = document.getElementById('modal');
+const modalBody = document.getElementById('modalBody');
+const closeModal = document.getElementById('closeModal');
+
+/* ===================== 資料來源（模擬） ===================== */
+let data = [];
+for(let i=1;i<=50;i++){
+  data.push({
+    id:'ST'+i,
+    city:i%2===0?'臺北市':'新北市',
+    town:i%3===0?'中正區':'信義區',
+    name:'站台 '+i,
+    tcp:Math.random()>0.5?'連線':'斷線',
+    cbf:Math.random()>0.5?'正常':'異常',
+    weather:Math.random()>0.5?'正常':'異常',
+    dio1:Math.random()>0.5?'ON':'OFF',
+    dio2:Math.random()>0.5?'ON':'OFF',
+    dio3:Math.random()>0.5?'ON':'OFF',
+  });
+}
+
+/* =========== statusCircle 函式 ===========
+   負責根據狀態字串回傳對應的圓圈 HTML（綠或紅）
+   你也可以在此加入 title 屬性顯示說明，或加入 aria-label 增強無障礙。
+*/
+function statusCircle(value){
+  if(value==='連線'||value==='正常'||value==='ON'){
+    // 綠色圓圈（表示正常）
+    return '<span class="status-circle status-online"></span>';
+  } else {
+    // 紅色圓圈（表示異常/斷線
+    return '<span class="status-circle status-offline"></span>';
+  }
+}
+
+/* =========== render 函式 ===========
+   依據篩選條件（縣市/鄉鎮）渲染整個列表與筆數
+   注意：為簡單起見，這裡會先移除既有 .list-row/.empty 再重建
+*/
+function render(filterCity='', filterTown=''){
+  // 移除舊的資料列（包含空白提示）
+  rowsContainer.querySelectorAll('.list-row, .empty').forEach(el=>el.remove());
+  // 篩選資料
+  let filtered = data.filter(d=>{
+    return (!filterCity || d.city===filterCity) && (!filterTown || d.town===filterTown);
+  });
+  // 更新總筆數顯示
+  stats.textContent = `共 ${filtered.length} 筆資料`;
+  // 若無資料，顯示空提示
+  if(filtered.length===0){
+    const d = document.createElement('div');
+    d.className='empty';
+    d.textContent='目前沒有資料。';
+    rowsContainer.appendChild(d);
+    return;
+  }
+  // 建立每一列 DOM
+  filtered.forEach((d,i)=>{
+    const row = document.createElement('div');
+    row.className='list-row';
+    // 以 innerHTML 快速產出欄位並插入對應的圓圈（statusCircle
+    row.innerHTML = `
+      <div class="col-1">${i+1}</div>
+      <div class="col-2">${d.id}</div>
+      <div class="col-3">${d.city}</div>
+      <div class="col-4">${d.town}</div>
+      <div class="col-5">${d.name}</div>
+      <div class="col-6">${statusCircle(d.tcp)}</div>
+      <div class="col-7">${statusCircle(d.cbf)}</div>
+      <div class="col-8">${statusCircle(d.weather)}</div>
+      <div class="col-9">${statusCircle(d.dio1)}</div>
+      <div class="col-10">${statusCircle(d.dio2)}</div>
+      <div class="col-11">${statusCircle(d.dio3)}</div>
+      <div class="col-12"><button class="btn-detail">明細</button></div>
+    `;
+    // 新增「明細」按鈕事件（使用閉包捕獲當前資料 d）
+    row.querySelector('.btn-detail').addEventListener('click',()=>showDetail(d));
+    // 將 row 插入到 list 容器（在 list-head 之後）
+    rowsContainer.appendChild(row);
+  });
+}
+
+/* =========== showDetail 函式 ===========
+   把某筆資料的詳細資訊放到 modal 中並顯示
+   你可以在這裡擴充：顯示更多欄位、加入趨勢圖、或連結到其他頁面
+*/
+function showDetail(d){
+  modalBody.innerHTML = `
+    <p><strong>站台ID:</strong> ${d.id}</p>
+    <p><strong>縣市:</strong> ${d.city}</p>
+    <p><strong>鄉鎮:</strong> ${d.town}</p>
+    <p><strong>站台名稱:</strong> ${d.name}</p>
+    <p><strong>TCP:</strong> ${d.tcp}</p>
+    <p><strong>中保防災:</strong> ${d.cbf}</p>
+    <p><strong>氣象:</strong> ${d.weather}</p>
+    <p><strong>DIO1:</strong> ${d.dio1}</p>
+    <p><strong>DIO2:</strong> ${d.dio2}</p>
+    <p><strong>DIO3:</strong> ${d.dio3}</p>
+  `;
+  // 顯示 modal（改為 flex）
+  modal.style.display = 'flex';
+}
+
+/* =========== modal 與頁面互動綁定 ===========
+   關閉 modal 的方法：點按關閉按鈕或點擊 backdrop（modal 外圍）
+*/
+closeModal.addEventListener('click',()=> modal.style.display='none');
+window.addEventListener('click',(e)=>{ if(e.target===modal) modal.style.display='none'; });
+
+/* =========== 篩選監聽（下拉變更時重新 render） ===========
+   當你接上實際 API 時，可把篩選值當成 query 參數，後端直接回傳篩選後的資料，
+   這樣可以避免前端載入大量資料後再篩選（若資料量很大應該使用後端篩選 / 分頁）。
+*/
+citySelect.addEventListener('change',()=>render(citySelect.value,townSelect.value));
+townSelect.addEventListener('change',()=>render(citySelect.value,townSelect.value));
+
+/* =========== Top 按鈕顯示邏輯 ===========
+   當頁面滾動超過 200px，顯示按鈕，點擊回到頁面頂部（平滑滾動）
+*/
+window.addEventListener('scroll',()=>{ topBtn.style.display = window.scrollY>200?'block':'none'; });
+topBtn.addEventListener('click',()=> window.scrollTo({top:0,behavior:'smooth'}));
+
+/* 初始 render（載入模擬資料） */
+render();
+
+// 模擬即時更新
+setInterval(()=>{
+  data.forEach(d=>{
+    if(Math.random()<0.1){ d.tcp = Math.random()>0.5?'連線':'斷線'; }
+    if(Math.random()<0.1){ d.cbf = Math.random()>0.5?'正常':'異常'; }
+    if(Math.random()<0.1){ d.weather = Math.random()>0.5?'正常':'異常'; }
+    if(Math.random()<0.1){ d.dio1 = Math.random()>0.5?'ON':'OFF'; }
+    if(Math.random()<0.1){ d.dio2 = Math.random()>0.5?'ON':'OFF'; }
+    if(Math.random()<0.1){ d.dio3 = Math.random()>0.5?'ON':'OFF'; }
+  });
+  // 重新 render，若篩選中會自動保留篩選值
+  render(citySelect.value, townSelect.value);
+},5000);
+</script>
+
+</body>
+</html>
+

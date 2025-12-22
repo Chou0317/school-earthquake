@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <title>地震感測系統</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #6c6c6c; /* 依據圖片色調 */
+    }
+
+    /* ===== 導覽列 ===== */
+    nav {
+      background: #000;   /* 導覽列背景黑色 */
+      padding: 12px 20px;   /* 上下左右內距（導覽列較小） */
+      display: flex;        /* 使用 flex 方便左右排版 */
+      align-items: center;  /* 垂直置中 */
+      justify-content: space-between;  /* 左右兩端對齊 */
+    }
+
+    /* 左側標題（可點選） */
+    .nav-title {
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;        /* 滑鼠變手勢，提示可點選 */
+      text-decoration: none;  /* 取消預設底線 */
+      transition: 0.25s;
+    }
+
+    .nav-title:hover {
+      color: #ffd700;  /* hover 顯示金色（視覺反饋） */
+    }
+
+    /* ===== 右側選單 ===== */
+    .nav-right {
+      display: flex;
+      align-items: center;
+    }
+
+    /* 主選單（水平排列） */
+    .nav-right ul {
+      list-style: none;    /* 取消項目符號 */
+      margin: 0;
+      padding: 0;
+      display: flex;
+      gap: 40px;           /* 選單項目之間的間距（可調） */
+      margin-right: 40px;  /* 整組向左移（減少貼邊感） */
+    }
+
+    /* 每個 li 保留相對定位以利絕對定位下拉選單 */
+    .nav-right ul li {
+      position: relative;
+      text-align: center; /* 讓主選單文字置中 */
+    }
+
+    /* 主選單連結樣式 */
+    .nav-right ul li a {
+      color: white;
+      text-decoration: none;
+      font-size: 17px;
+      padding: 6px 15px;
+      display: block;     /* 使 a 佔滿可點擊區域 */
+      font-weight: bold;
+      text-align: center; /* 置中下拉後的文字 */
+    }
+
+    /* hover 顯示金色，提示可互動 */
+    .nav-right ul li:hover > a {
+      color: #ffd700;
+    }
+
+    /* 下拉選單（初始隱藏） */
+    .nav-right ul li ul {
+      display: none;
+      position: absolute;           /* 相對於父 li 絕對定位 */
+      top: 38px;                    /* 下拉選單 Y 偏移（依 nav 高度可調） */
+      left: 50%;
+      transform: translateX(-50%);  /* 置中對齊父項 */
+      background: #222;
+      padding: 10px 0;
+      border-radius: 6px;
+      min-width: 160px;
+      text-align: center;
+      z-index: 10;                  /* 確保在其他元素之上 */
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+
+    /* 當父 li hover 時顯示下拉選單 */
+    .nav-right ul li:hover ul {
+      display: block;
+    }
+
+    .nav-right ul li ul li a:hover {
+      color: #ffd700;  /* 輕微底色提示 */
+    }
+
+    /* iframe */
+    iframe {
+      width: 100%;
+      height: 90vh;  /* 使主頁面內容占大部分高度 */
+      border: none;
+    }
+  </style>
+
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+
+<body>
+
+<!-- ===== 導覽列 ===== -->
+<nav>
+  <!-- 左側可點選標題 -->
+  <a class="nav-title" onclick="loadPage('earthquake information.html')">
+    即時地震監測系統
+  </a>
+
+  <!-- 右側功能列 -->
+  <div class="nav-right">
+    <ul>
+      <li>
+        <a href="#">地震事件</a>
+        <ul>
+          <li><a href="#" onclick="loadPage('event.html')">地震事件紀錄</a></li>
+          <li><a href="#" onclick="loadPage('DIO report.html')">DIO發報紀錄</a></li>
+        </ul>
+      </li>
+
+      <li>
+        <a href="#">2U主機管理</a>
+        <ul>
+          <li><a href="#">2U主機管理</a></li>
+          <li><a href="#" onclick="loadPage('monitor.html')">即時監控</a></li>
+          <li><a href="#" onclick="loadPage('simulation.html')">地震模擬</a></li>
+          <li><a href="#" onclick="loadPage('group simulation.html')">地震模擬(群組)</a></li>
+          <li><a href="#">地震模擬排程</a></li>
+          <li><a href="#" onclick="loadPage('group.html')">群組管理</a></li>
+          <li><a href="#">氣象署連線設定</a></li>
+          <li><a href="#" onclick="loadPage('threshold.html')">地震發報設定</a></li>
+          <li><a href="#" onclick="loadPage('state.html')">管理紀錄</a></li>
+        </ul>
+      </li>
+
+      <li>
+        <a href="#">文件下載</a>
+        <ul>
+          <li><a href="#" onclick="loadPage('word.html')">文件下載</a></li>
+        </ul>
+      </li>
+
+      <li>
+        <a href="#">後台設定</a>
+        <ul>
+          <li><a href="#" onclick="loadPage('permissions.html')">權限管理</a></li>
+          <li><a href="#">帳號管理</a></li>
+          <li><a href="#" onclick="loadPage('password.html')">變更密碼</a></li>
+          <li><a href="#" onclick="loadPage('backend.html')">後台紀錄</a></li>
+          <li><a href="#">登出</a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ===== 主內容區 ===== -->
+<iframe id="contentFrame" src="earthquake information.html"></iframe>
+
+<script>
+  function loadPage(filename) {
+    document.getElementById("contentFrame").src = filename;
+  }
+
+</script>
+
+</body>
+</html>
+

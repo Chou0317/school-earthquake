@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DIO發報紀錄</title>
+
+<style>
+:root{
+  --bg:#6c6c6c;
+  --card:#ffffff;
+  --primary:#002b88;
+  --primary-light:#3b82f6;
+  --danger:#ef4444;
+  --muted:#6b7280;
+  --shadow:0 6px 18px rgba(15,23,42,0.08);
+  --radius:12px;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans TC','Microsoft JhengHei',sans-serif;
+}
+
+html,body{ height:100%; margin:0; background:var(--bg); }
+body{ padding:24px; display:flex; justify-content:center; }
+
+.card{ width:100%; max-width:1100px; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+
+.header{ padding:16px 20px; background:var(--primary); color:#fff; }
+.title{ font-size:20px; font-weight:600; }
+
+.search-row{ display:flex; flex-wrap:wrap; gap:12px; padding:14px 20px; background:#f9fafb; }
+
+.form-group{ display:flex; align-items:center; gap:6px; }
+.form-group-row{ display:flex; align-items:center; gap:12px; } /* ID + 名稱 + 搜尋同一行 */
+.form-group label{ font-size:14px; color:var(--muted); white-space:nowrap; }
+.search-row select, .search-row input{ height:32px; padding:4px 8px; border-radius:6px; border:1px solid #ccc; font-size:14px; }
+.btn-search{ height:32px; padding:0 16px; border:none; border-radius:6px; background:var(--primary-light); color:#fff; font-weight:600; cursor:pointer; }
+
+#countText{ padding:8px 20px; color:var(--muted); }
+
+.list{ border-top:1px solid #eee; }
+.list-head, .list-row{ display:flex; gap:12px; padding:10px 8px; align-items:center; }
+.list-head{ background:#f9fafb; font-weight:700; color:var(--muted); }
+.list-row{ border-bottom:1px solid #f2f2f2; }
+
+.col-1{ width:60px; text-align:center; }
+.col-2{ width:140px; }
+.col-3,.col-4,.col-5{ flex:1; min-width:120px; }
+.col-6{ width:180px; }
+.col-7{ width:100px; text-align:center; }
+
+.empty{ padding:28px; text-align:center; color:var(--muted); }
+
+#topBtn{ position:fixed; right:20px; bottom:20px; width:44px; height:44px; border:none; border-radius:8px; background:var(--primary-light); color:#fff; cursor:pointer; display:none; }
+</style>
+</head>
+
+<body>
+<div class="card">
+
+  <div class="header">
+    <div class="title">DIO發報紀錄</div>
+  </div>
+
+  <div class="search-row">
+
+    <div class="form-group">
+      <label>縣市</label>
+      <select id="countySelect"></select>
+    </div>
+
+    <div class="form-group">
+      <label>鄉鎮</label>
+      <select id="townSelect"></select>
+    </div>
+
+    <div class="form-group">
+      <label>警報震度</label>
+      <select id="intensitySelect">
+        <option value="-">-</option>
+        <option>1</option><option>2</option><option>3</option><option>4</option>
+        <option>5弱</option><option>5強</option>
+        <option>6弱</option><option>6強</option><option>7</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>時間區間</label>
+      <input type="date" id="startDate">
+      <span>~</span>
+      <input type="date" id="endDate">
+    </div>
+
+    <!-- ID & 名稱同一行 -->
+    <div class="form-group-row">
+      <div class="form-group">
+        <label>ID</label>
+        <input id="idInput" placeholder="主機ID">
+      </div>
+      <div class="form-group">
+        <label>名稱</label>
+        <input id="nameInput" placeholder="主機名稱">
+      </div>
+      <button class="btn-search" onclick="search()">搜尋</button>
+    </div>
+
+  </div>
+
+  <div id="countText">共 0 筆資料</div>
+
+  <div class="list">
+    <div class="list-head">
+      <div class="col-1">序號</div>
+      <div class="col-2">ID</div>
+      <div class="col-3">縣市</div>
+      <div class="col-4">鄉鎮</div>
+      <div class="col-5">名稱</div>
+      <div class="col-6">警報時間</div>
+      <div class="col-7">震度</div>
+    </div>
+    <div id="rows"></div>
+  </div>
+
+</div>
+
+<button id="topBtn" onclick="scrollTo({top:0,behavior:'smooth'})">TOP</button>
+
+<script>
+// 範例資料
+const data = [
+  {id:'DIO001',county:'台北市',town:'內湖區',name:'主機A',time:'2025-12-21 11:30:15',intensity:'5弱'},
+  {id:'DIO002',county:'新北市',town:'板橋區',name:'主機B',time:'2025-12-20 08:15:42',intensity:'4級'},
+  {id:'DIO003',county:'高雄市',town:'左營區',name:'主機C',time:'2025-12-18 22:45:10',intensity:'6弱'}
+];
+
+// 縣市->鄉鎮對應
+const counties={
+  '台北市':['內湖區','大安區'],
+  '新北市':['板橋區','新店區'],
+  '高雄市':['左營區','苓雅區']
+};
+
+// 初始化下拉選單
+const countySelect=document.getElementById('countySelect');
+const townSelect=document.getElementById('townSelect');
+countySelect.innerHTML='<option value="-">-</option>';
+Object.keys(counties).forEach(c=>countySelect.innerHTML+=`<option>${c}</option>`);
+townSelect.innerHTML='<option value="-">-</option>';
+
+// 選擇縣市時更新鄉鎮
+countySelect.onchange=()=>{
+  townSelect.innerHTML='<option value="-">-</option>';
+  (counties[countySelect.value]||[]).forEach(t=>{
+    townSelect.innerHTML+=`<option>${t}</option>`;
+  });
+};
+
+// 渲染列表
+function render(list){
+  const rows=document.getElementById('rows');
+  rows.innerHTML='';
+  document.getElementById('countText').textContent=`共 ${list.length} 筆資料`;
+  if(!list.length){ rows.innerHTML='<div class="empty">查無資料</div>'; return; }
+  list.forEach((r,i)=>{
+    rows.innerHTML+=`
+      <div class="list-row">
+        <div class="col-1">${i+1}</div>
+        <div class="col-2">${r.id}</div>
+        <div class="col-3">${r.county}</div>
+        <div class="col-4">${r.town}</div>
+        <div class="col-5">${r.name}</div>
+        <div class="col-6">${r.time}</div>
+        <div class="col-7">${r.intensity}</div>
+      </div>`;
+  });
+}
+
+// 搜尋功能（比對日期只取 YYYY-MM-DD）
+function search(){
+  let list=data.filter(r=>{
+    const rDate=r.time.slice(0,10); // YYYY-MM-DD
+    if(countySelect.value!='-' && r.county!=countySelect.value) return false;
+    if(townSelect.value!='-' && r.town!=townSelect.value) return false;
+    if(intensitySelect.value!='-' && r.intensity!=intensitySelect.value) return false;
+    if(idInput.value && !r.id.includes(idInput.value)) return false;
+    if(nameInput.value && !r.name.includes(nameInput.value)) return false;
+    if(startDate.value && rDate<startDate.value) return false;
+    if(endDate.value && rDate>endDate.value) return false;
+    return true;
+  });
+  render(list);
+}
+
+// 初始化
+render(data);
+
+// TOP 按鈕顯示
+const topBtn=document.getElementById('topBtn');
+window.onscroll=()=>topBtn.style.display=scrollY>120?'flex':'none';
+</script>
+</body>
+</html>
+
+

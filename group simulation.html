@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>群組地震模擬</title>
+<style>
+/* =========================== 全局變數與字體 =========================== */
+:root{
+  --bg:#6c6c6c;
+  --card:#ffffff;
+  --primary:#002b88;
+  --primary-light:#3b82f6;
+  --danger:#ef4444;
+  --muted:#6b7280;
+  --shadow:0 6px 18px rgba(15,23,42,0.08);
+  --radius:12px;
+  font-family:-apple-system, BlinkMacSystemFont,'Segoe UI', Roboto,'Noto Sans TC','Microsoft JhengHei',sans-serif;
+}
+/* =========================== 基本頁面樣式 =========================== */
+html,body{ height:100%; margin:0; background:var(--bg); }
+body{ padding:24px; display:flex; justify-content:center; }
+/* =========================== 卡片容器 =========================== */
+.card{ width:100%; max-width:980px; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; margin-top:20px; }
+/* =========================== header =========================== */
+.header{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 20px; background:var(--primary); color:white; }
+.title{ font-size:20px; font-weight:600; }
+/* =========================== 搜尋區 =========================== */
+.search-row{ display:flex; align-items:center; gap:12px; padding:12px 20px; background:#f9fafb; border-radius:8px; margin:0 16px 12px 16px; flex-wrap:wrap; }
+.search-row .form-group{ display:flex; align-items:center; gap:6px; }
+.search-row label{ font-size:15px; font-weight:500; color:var(--muted); white-space:nowrap; line-height:32px; }
+.search-row input{ height:32px; padding:4px 8px; border-radius:6px; border:1px solid #ccc; font-size:14px; }
+.btn-search{ height:32px; padding:0 14px; border-radius:6px; background:var(--primary-light); color:#fff; border:none; cursor:pointer; font-weight:600; font-size:14px; display:flex; align-items:center; justify-content:center; }
+/* =========================== 列表 =========================== */
+.list{ width:100%; border-top:1px solid #eee; border-bottom:1px solid #eee; margin-top:0; }
+.list-head{ display:flex; gap:12px; padding:10px 8px; align-items:center; color:var(--muted); font-weight:700; background:#f9fafb; }
+.list-row{ display:flex; align-items:center; gap:12px; padding:12px 8px; border-bottom:1px solid #f2f2f2; }
+.col-1{ width:60px; flex-shrink:0; text-align:center; color:var(--muted); }
+.col-2,.col-3{ flex:1; min-width:140px; }
+.col-4{ flex:1; min-width:160px; display:flex; gap:6px; align-items:center; }
+.col-4 select{ height:28px; padding:2px 6px; border-radius:6px; border:1px solid #ccc; font-size:14px; }
+.col-4 button{ height:28px; padding:0 10px; border-radius:6px; background:var(--primary-light); color:#fff; border:none; cursor:pointer; font-weight:500; }
+.empty{ padding:28px; text-align:center; color:var(--muted); }
+/* =========================== TOP 按鈕 =========================== */
+#topBtn{ position:fixed; right:20px; bottom:20px; width:44px; height:44px; background:var(--primary-light); color:white; border:none; border-radius:8px; display:none; align-items:center; justify-content:center; cursor:pointer; z-index:200; }
+#topBtn:hover{ background:#0056b3; }
+/* =========================== 小螢幕響應 =========================== */
+@media (max-width:720px){
+  .list-head{ font-size:13px; }
+  .col-2,.col-3,.col-4{ min-width:80px; flex-wrap:wrap; }
+  .search-row{ gap:8px; }
+}
+</style>
+</head>
+<body>
+<div class="card" id="mainCard">
+  <!-- header -->
+  <div class="header">
+    <div class="title">群組地震模擬</div>
+  </div>
+  <!-- 搜尋區 -->
+  <div class="search-row">
+    <div class="form-group">
+      <label for="idInput">ID</label>
+      <input type="text" id="idInput" placeholder="輸入群組ID">
+    </div>
+    <div class="form-group">
+      <label for="nameInput">名稱</label>
+      <input type="text" id="nameInput" placeholder="輸入群組名稱">
+    </div>
+    <button class="btn-search" onclick="searchGroups()">搜尋</button>
+  </div>
+  <!-- 資料筆數 -->
+  <div id="countText" style="padding:8px 20px;color:var(--muted)">共 0 筆資料</div>
+  <!-- 群組列表 -->
+  <div class="list" aria-live="polite">
+    <div class="list-head">
+      <div class="col-1">序號</div>
+      <div class="col-2">ID</div>
+      <div class="col-3">名稱</div>
+      <div class="col-4">模擬地震</div>
+    </div>
+    <div id="rowsContainer">
+      <div class="empty">載入中...</div>
+    </div>
+  </div>
+</div>
+<!-- TOP 按鈕 -->
+<button id="topBtn" onclick="scrollToTop()">TOP</button>
+
+<script>
+// =========================== 假資料 ===========================
+let groups = [
+  {id:'G001', name:'第一群組'},
+  {id:'G002', name:'第二群組'},
+  {id:'G003', name:'實驗組'},
+  {id:'G004', name:'測試群組'},
+  {id:'G005', name:'模擬群組'}
+];
+
+// =========================== 渲染列表 ===========================
+const rowsContainer=document.getElementById('rowsContainer');
+const countText=document.getElementById('countText');
+
+function render(list){
+  rowsContainer.innerHTML='';
+  if(!list || list.length===0){
+    rowsContainer.innerHTML='<div class="empty">查無資料</div>';
+    countText.textContent='共 0 筆資料';
+    return;
+  }
+  countText.textContent='共 '+list.length+' 筆資料';
+  list.forEach((g,idx)=>{
+    const row=document.createElement('div');
+    row.className='list-row';
+    row.innerHTML=`
+      <div class="col-1">${idx+1}</div>
+      <div class="col-2">${escapeHtml(g.id)}</div>
+      <div class="col-3">${escapeHtml(g.name)}</div>
+      <div class="col-4">
+        <select id="sim_${g.id}">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5-">5弱</option>
+          <option value="5+">5強</option>
+          <option value="6-">6弱</option>
+          <option value="6+">6強</option>
+          <option value="7">7</option>
+        </select>
+        <button onclick="sendSimulation('${g.id}')">送出</button>
+      </div>
+    `;
+    rowsContainer.appendChild(row);
+  });
+}
+
+// 避免 HTML 注入
+function escapeHtml(s){
+  return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;')
+    .replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');
+}
+
+// 搜尋功能
+function searchGroups(){
+  const idVal=document.getElementById('idInput').value.trim().toLowerCase();
+  const nameVal=document.getElementById('nameInput').value.trim().toLowerCase();
+  let filtered = groups.filter(g=>{
+    return (!idVal || g.id.toLowerCase().includes(idVal)) &&
+           (!nameVal || g.name.toLowerCase().includes(nameVal));
+  });
+  render(filtered);
+}
+
+// 模擬地震送出
+function sendSimulation(id){
+  const val=document.getElementById(`sim_${id}`).value;
+  alert(`群組 ${id} 模擬地震等級: ${val}`);
+}
+
+// =========================== TOP 按鈕 ===========================
+const topBtn=document.getElementById('topBtn');
+window.addEventListener('scroll',()=>{topBtn.style.display=(window.scrollY>120)?'flex':'none';});
+function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
+
+// =========================== 初始化 ===========================
+render(groups);
+
+</script>
+</body>
+</html>

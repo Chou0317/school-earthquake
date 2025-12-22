@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>地震模擬</title>
+<style>
+:root{
+  --bg:#6c6c6c;
+  --card:#ffffff;
+  --primary:#002b88;
+  --primary-light:#3b82f6;
+  --danger:#ef4444;
+  --muted:#6b7280;
+  --shadow:0 6px 18px rgba(15,23,42,0.08);
+  --radius:12px;
+  font-family:-apple-system, BlinkMacSystemFont,'Segoe UI', Roboto,'Noto Sans TC','Microsoft JhengHei',sans-serif;
+}
+html,body{height:100%; margin:0; background:var(--bg);}
+body{padding:24px; display:flex; justify-content:center;}
+
+/* 卡片 */
+.card{width:100%; max-width:980px; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; margin-top:20px;}
+
+/* header */
+.header{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 20px; background:var(--primary); color:white;}
+.title{font-size:20px; font-weight:600;}
+
+/* 搜尋區 */
+.search-row { display:flex; align-items:center; gap:12px; padding:12px 20px; background:#f9fafb; border-radius:8px; margin:0 16px 12px 16px; flex-wrap:wrap; }
+.search-row .form-group{ display:flex; align-items:center; gap:6px; }
+.search-row label{ font-size:15px; font-weight:500; color:var(--muted); white-space:nowrap; line-height:32px; }
+.search-row select, .search-row input[type="text"]{ height:32px; padding:4px 8px; border-radius:6px; border:1px solid #ccc; font-size:14px; background:#fff; -webkit-appearance:none; -moz-appearance:none; appearance:none; }
+.btn-search{ height:32px; padding:0 14px; border-radius:6px; background:var(--primary-light); color:#fff; border:none; cursor:pointer; font-weight:600; font-size:14px; display:flex; align-items:center; justify-content:center; }
+
+/* 列表 */
+.list{ width:100%; border-top:1px solid #eee; border-bottom:1px solid #eee; margin-top:0; }
+.list-head{ display:flex; gap:12px; padding:10px 8px; align-items:center; color:var(--muted); font-weight:700; background:#f9fafb; }
+.list-row{ display:flex; align-items:center; gap:12px; padding:12px 8px; border-bottom:1px solid #f2f2f2; }
+
+.col-1{ width:60px; flex-shrink:0; text-align:center; color:var(--muted); }
+.col-2,.col-3,.col-5,.col-6{ flex:1; min-width:120px; }
+.col-4{ width:120px; flex-shrink:0; text-align:center; }
+
+/* 模擬按鈕 */
+.sim-btn{ padding:4px 8px; border-radius:6px; background:var(--primary-light); color:#fff; border:none; cursor:pointer; font-size:13px; font-weight:600; margin-left:4px; }
+
+/* 查無資料提示 */
+.empty{ padding:28px; text-align:center; color:var(--muted); }
+
+/* TOP 按鈕 */
+#topBtn{ position:fixed; right:20px; bottom:20px; width:44px; height:44px; background:var(--primary-light); color:white; border:none; border-radius:8px; display:none; align-items:center; justify-content:center; cursor:pointer; z-index:200; }
+#topBtn:hover{ background:#0056b3; }
+
+/* 小螢幕響應 */
+@media (max-width:720px){
+  .list-head{ font-size:13px; }
+  .col-2,.col-3,.col-5,.col-6{ min-width:80px; }
+  .search-row{ gap:8px; }
+}
+</style>
+</head>
+<body>
+<div class="card" id="mainCard">
+  <!-- header -->
+  <div class="header">
+    <div class="title">地震模擬</div>
+  </div>
+
+  <!-- 搜尋區 -->
+  <div class="search-row" role="search" aria-label="搜尋主機">
+    <div class="form-group">
+      <label for="idInput">ID</label>
+      <input type="text" id="idInput" placeholder="輸入主機ID">
+    </div>
+    <div class="form-group">
+      <label for="countySelect">縣市</label>
+      <select id="countySelect">
+        <option value="-">-</option>
+        <option value="台北市">台北市</option>
+        <option value="新北市">新北市</option>
+        <option value="桃園市">桃園市</option>
+        <option value="台中市">台中市</option>
+        <option value="台南市">台南市</option>
+        <option value="高雄市">高雄市</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="townSelect">鄉鎮</label>
+      <select id="townSelect">
+        <option value="-">-</option>
+      </select>
+    </div>
+    <button class="btn-search" onclick="searchHosts()">搜尋</button>
+  </div>
+
+  <!-- 資料筆數 -->
+  <div id="countText" style="padding:8px 20px;color:var(--muted)">共 0 筆資料</div>
+
+  <!-- 列表 -->
+  <div class="list" aria-live="polite">
+    <div class="list-head">
+      <div class="col-1">序號</div>
+      <div class="col-2">ID</div>
+      <div class="col-3">縣市</div>
+      <div class="col-4">鄉鎮</div>
+      <div class="col-5">名稱</div>
+      <div class="col-6">模擬地震</div>
+    </div>
+    <div id="rowsContainer">
+      <div class="empty">載入中...</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOP 按鈕 -->
+<button id="topBtn" onclick="scrollToTop()">TOP</button>
+
+<script>
+// 假資料
+let hosts = [
+  {id:'H001', county:'台北市', town:'內湖區', name:'主機A'},
+  {id:'H002', county:'台北市', town:'大安區', name:'主機B'},
+  {id:'H003', county:'新北市', town:'板橋區', name:'主機C'},
+  {id:'H004', county:'高雄市', town:'左營區', name:'主機D'},
+  {id:'H005', county:'高雄市', town:'苓雅區', name:'主機E'}
+];
+
+// 鄉鎮依縣市動態
+const countyTownMap={
+  '台北市':['內湖區','大安區','中正區'],
+  '新北市':['板橋區','新店區','永和區'],
+  '桃園市':['桃園區','中壢區'],
+  '台中市':['西屯區','北區'],
+  '台南市':['安平區','東區'],
+  '高雄市':['左營區','苓雅區','三民區']
+};
+
+const countySelect=document.getElementById('countySelect');
+const townSelect=document.getElementById('townSelect');
+
+countySelect.addEventListener('change',()=>{
+  const county=countySelect.value;
+  townSelect.innerHTML='<option value="-">-</option>';
+  if(countyTownMap[county]){
+    countyTownMap[county].forEach(t=>{
+      const opt=document.createElement('option'); opt.value=t; opt.textContent=t;
+      townSelect.appendChild(opt);
+    });
+  }
+});
+
+// 渲染列表
+const rowsContainer=document.getElementById('rowsContainer');
+const countText=document.getElementById('countText');
+
+function render(list){
+  rowsContainer.innerHTML='';
+  if(!list||list.length===0){
+    rowsContainer.innerHTML='<div class="empty">查無資料</div>';
+    countText.textContent='共 0 筆資料';
+    return;
+  }
+  countText.textContent='共 '+list.length+' 筆資料';
+  list.forEach((h,idx)=>{
+    const row=document.createElement('div');
+    row.className='list-row';
+    row.innerHTML=`
+      <div class="col-1">${idx+1}</div>
+      <div class="col-2">${h.id}</div>
+      <div class="col-3">${h.county}</div>
+      <div class="col-4">${h.town}</div>
+      <div class="col-5">${h.name}</div>
+      <div class="col-6">
+        <select id="sim_${h.id}">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5-">5弱</option>
+          <option value="5+">5強</option>
+          <option value="6-">6弱</option>
+          <option value="6+">6強</option>
+          <option value="7">7</option>
+        </select>
+        <button class="sim-btn" onclick="sendSim('${h.id}')">送出</button>
+      </div>
+    `;
+    rowsContainer.appendChild(row);
+  });
+}
+
+// 搜尋功能
+function searchHosts(){
+  const idVal=document.getElementById('idInput').value.trim().toLowerCase();
+  const countyVal=countySelect.value;
+  const townVal=townSelect.value;
+  let filtered=hosts.slice();
+  if(idVal!='') filtered=filtered.filter(h=>h.id.toLowerCase().includes(idVal));
+  if(countyVal!='-') filtered=filtered.filter(h=>h.county===countyVal);
+  if(townVal!='-') filtered=filtered.filter(h=>h.town===townVal);
+  render(filtered);
+}
+
+// 模擬送出
+function sendSim(id){
+  const sel=document.getElementById('sim_'+id);
+  alert(`主機 ${id} 模擬地震：${sel.value}`);
+}
+
+// TOP 按鈕
+const topBtn=document.getElementById('topBtn');
+window.addEventListener('scroll',()=>{topBtn.style.display=(window.scrollY>120)?'flex':'none';});
+function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
+
+// 初始化
+(function init(){ render(hosts); })();
+</script>
+</body>
+</html>
+

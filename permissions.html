@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>權限管理</title>
+<style>
+/* ================= 全域樣式 ================= */
+:root{
+  --bg:#6c6c6c;
+  --card:#ffffff;
+  --primary:#002b88;
+  --primary-light:#3b82f6;
+  --danger:#ef4444;
+  --muted:#6b7280;
+  --shadow:0 6px 18px rgba(15,23,42,0.08);
+  --radius:12px;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans TC','Microsoft JhengHei',sans-serif;
+}
+html,body{height:100%;margin:0;background:var(--bg);}
+body{padding:24px;display:flex;justify-content:center;}
+
+/* ================= 卡片 ================= */
+.card{
+  width:100%;
+  max-width:1100px;
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+/* ================= Header ================= */
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 20px;
+  background:var(--primary);
+  color:#fff;
+}
+.title{font-size:20px;font-weight:600;}
+.actions{display:flex;gap:8px;}
+
+/* ================= 按鈕 ================= */
+.btn{border:0;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;}
+.btn-primary{background:var(--primary-light);color:#fff;}
+.btn-danger{background:var(--danger);color:#fff;}
+.icon-btn{padding:6px 8px;border-radius:8px;border:1px solid rgba(0,0,0,.1);background:#fff;cursor:pointer;}
+
+/* ================= 列表 ================= */
+.list{border-top:1px solid #eee;border-bottom:1px solid #eee;}
+.list-head,.list-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 8px;
+}
+.list-head{background:#f9fafb;font-weight:700;color:var(--muted);}
+.list-row{border-bottom:1px solid #f2f2f2;}
+.col-1{width:60px;text-align:center;color:var(--muted);}
+.col-2{flex:1;min-width:160px;}
+.col-3{flex:2;min-width:220px;}
+.col-4,.col-5,.col-6{width:90px;text-align:center;}
+.empty{padding:28px;text-align:center;color:var(--muted);}
+
+/* ================= 資料筆數 ================= */
+#countText{padding:8px 20px;color:var(--muted);}
+
+/* ================= Modal ================= */
+.modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.45);display:flex;align-items:center;justify-content:center;z-index:100;}
+.modal{
+  background:#fff;
+  border-radius:var(--radius);
+  max-width:760px;
+  width:94%;
+  max-height:90vh;
+  display:flex;
+  flex-direction:column;
+  box-shadow:var(--shadow);
+}
+.modal-body{
+  padding:18px;
+  overflow-y:auto;
+}
+.modal-header{padding:16px 20px;background:var(--primary);color:#fff;font-size:18px;font-weight:600;}
+.modal-footer{padding:12px 18px;background:#f9fafb;display:flex;gap:8px;justify-content:flex-end;}
+
+/* ================= 表單 ================= */
+.form-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;}
+.form-row label{width:90px;color:var(--muted);font-weight:500;}
+.form-row input[type="text"]{flex:1;padding:6px 8px;border-radius:6px;border:1px solid #ccc;}
+
+/* ================= 權限樹 ================= */
+.permission-box{
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  padding:16px;
+  max-width:100%;
+  width:100%;
+  background:#fafafa;
+  overflow-x:auto;
+}
+.permission-group{margin-bottom:10px;}
+.permission-group > label{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-weight:700;
+  white-space: nowrap; /* 父層文字一行顯示 */
+}
+.permission-children{
+  margin-left:22px;
+  margin-top:6px;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.permission-children label{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-weight:400;
+  white-space:nowrap; /* 子層文字一行顯示 */
+}
+
+/* ================= TOP 按鈕 ================= */
+#topBtn{position:fixed;right:20px;bottom:20px;width:42px;height:42px;border-radius:8px;background:var(--primary-light);color:#fff;border:none;cursor:pointer;display:none;z-index:200;}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <div class="title">權限管理</div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="openModal()">＋ 新增權限</button>
+    </div>
+  </div>
+
+  <div class="list">
+    <div class="list-head">
+      <div class="col-1">序號</div>
+      <div class="col-2">權限名稱</div>
+      <div class="col-3">權限說明</div>
+      <div class="col-4">編輯</div>
+      <div class="col-5">刪除</div>
+      <div class="col-6">明細</div>
+    </div>
+    <div id="rowsContainer">
+      <div class="empty">目前沒有權限資料</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= Modal ================= -->
+<div id="modal" style="display:none">
+  <div class="modal-backdrop" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header" id="modalTitle">新增權限</div>
+      <div class="modal-body">
+
+        <div class="form-row">
+          <label>權限名稱</label>
+          <input id="permName" type="text" placeholder="輸入權限名稱" />
+        </div>
+
+        <div class="form-row">
+          <label>權限說明</label>
+          <input id="permDesc" type="text" placeholder="輸入說明" />
+        </div>
+
+        <div class="form-row">
+          <label>開放功能</label>
+          <div class="permission-box">
+
+            <!-- 地震事件 -->
+            <div class="permission-group">
+              <label><input type="checkbox" data-group="eq" onchange="toggleGroup(this)" /> 地震事件</label>
+              <div class="permission-children">
+                <label><input type="checkbox" data-parent="eq" value="eq_record" onchange="updateParentCheckbox(this)" /> 地震事件紀錄</label>
+                <label><input type="checkbox" data-parent="eq" value="dio_record" onchange="updateParentCheckbox(this)" /> DIO 發報紀錄</label>
+              </div>
+            </div>
+
+            <!-- 2U 主機管理 -->
+            <div class="permission-group">
+              <label><input type="checkbox" data-group="2u" onchange="toggleGroup(this)" /> 2U 主機管理</label>
+              <div class="permission-children">
+                <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 2U 主機管理</label>
+                <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 連線狀態</label>
+                <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 地震模擬</label>
+                <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 地震模擬（群組）</label>
+                <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 地震模擬排程</label>
+                <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 群組管理</label>
+                <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 氣象署連線設定</label>
+                <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 地震發報設定</label>
+                <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 管理紀錄</label>
+              </div>
+            </div>
+
+            <!-- 文件下載 -->
+            <div class="permission-group">
+              <label><input type="checkbox" /> 文件下載</label>
+            </div>
+
+            <!-- 後台設定 -->
+            <div class="permission-group">
+              <label><input type="checkbox" data-group="backend" onchange="toggleGroup(this)" /> 後台設定</label>
+              <div class="permission-children">
+                <label><input type="checkbox" data-parent="backend" onchange="updateParentCheckbox(this)" /> 權限管理</label>
+                <label><input type="checkbox" data-parent="backend" onchange="updateParentCheckbox(this)" /> 帳號管理</label>
+                <label><input type="checkbox" data-parent="backend" onchange="updateParentCheckbox(this)" /> 後台紀錄</label>
+                <label><input type="checkbox" data-parent="backend" onchange="updateParentCheckbox(this)" /> 變更密碼</label>
+                <label><input type="checkbox" data-parent="backend" onchange="updateParentCheckbox(this)" /> 登出</label>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" id="confirmBtn" onclick="savePermission()">確認</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="topBtn" onclick="scrollToTop()">TOP</button>
+
+<script>
+/* ================= 資料 ================= */
+let permissions = [];
+let editingIndex = null;
+
+const rowsContainer = document.getElementById('rowsContainer');
+const countText = document.getElementById('countText');
+
+/* ================= 列表渲染 ================= */
+function render(){
+  rowsContainer.innerHTML = '';
+  if(permissions.length === 0){
+    rowsContainer.innerHTML = '<div class="empty">目前沒有權限資料</div>';
+    return;
+  }
+
+  permissions.forEach((p,i)=>{
+    const row = document.createElement('div');
+    row.className = 'list-row';
+    row.innerHTML = `
+      <div class="col-1">${i+1}</div>
+      <div class="col-2">${p.name}</div>
+      <div class="col-3">${p.desc}</div>
+      <div class="col-4"><button class="icon-btn" onclick="editPerm(${i})">編輯</button></div>
+      <div class="col-5"><button class="icon-btn" onclick="delPerm(${i})">刪除</button></div>
+      <div class="col-6"><button class="icon-btn" onclick="viewPerm(${i})">明細</button></div>
+    `;
+    rowsContainer.appendChild(row);
+  });
+}
+
+/* ================= Modal ================= */
+function openModal(){
+  editingIndex = null;
+  document.getElementById('modalTitle').textContent = '新增權限';
+  document.getElementById('permName').value='';
+  document.getElementById('permDesc').value='';
+  document.getElementById('permName').disabled=false;
+  document.getElementById('permDesc').disabled=false;
+  document.querySelectorAll('#modal input[type=checkbox]').forEach(c=>{c.checked=false;c.disabled=false});
+  document.getElementById('confirmBtn').style.display='inline-block';
+  document.getElementById('modal').style.display='block';
+}
+function closeModal(e){
+  if(e && e.target!==e.currentTarget) return;
+  document.getElementById('modal').style.display='none';
+}
+
+function savePermission(){
+  const name = document.getElementById('permName').value.trim();
+  const desc = document.getElementById('permDesc').value.trim();
+  if(!name){ alert('請輸入權限名稱'); return; }
+
+  const checks = Array.from(document.querySelectorAll('#modal input[type=checkbox]:checked'))
+    .map(c=>c.parentElement.textContent.trim());
+
+  const data = { name, desc, perms: checks };
+  if(editingIndex!==null) permissions[editingIndex]=data;
+  else permissions.push(data);
+
+  closeModal();
+  render();
+}
+
+function editPerm(i){
+  const p = permissions[i];
+  editingIndex = i;
+  document.getElementById('modalTitle').textContent = '編輯權限';
+  document.getElementById('permName').value = p.name;
+  document.getElementById('permDesc').value = p.desc;
+
+  document.getElementById('permName').disabled = false;
+  document.getElementById('permDesc').disabled = false;
+
+  document.querySelectorAll('#modal input[type=checkbox]').forEach(c=>{
+    c.disabled = false;
+    c.checked = p.perms.includes(c.parentElement.textContent.trim());
+  });
+
+  document.getElementById('confirmBtn').style.display='inline-block';
+  document.getElementById('modal').style.display='block';
+}
+
+function delPerm(i){
+  if(confirm('確定刪除此權限？')){
+    permissions.splice(i,1);
+    render();
+  }
+}
+
+function viewPerm(i){
+  const p = permissions[i];
+  document.getElementById('modalTitle').textContent = '權限明細';
+  document.getElementById('permName').value = p.name;
+  document.getElementById('permDesc').value = p.desc;
+
+  document.querySelectorAll('#modal input[type=checkbox]').forEach(c=>{
+    c.checked = p.perms.includes(c.parentElement.textContent.trim());
+    c.disabled = true;
+  });
+
+  document.getElementById('permName').disabled = true;
+  document.getElementById('permDesc').disabled = true;
+  document.querySelector('.modal-footer .btn-primary').style.display='none';
+  document.getElementById('modal').style.display='block';
+}
+
+/* ================= 父層控制子層 ================= */
+function toggleGroup(parentCheckbox){
+  const group = parentCheckbox.dataset.group;
+  document.querySelectorAll(`#modal input[data-parent="${group}"]`).forEach(c=>{
+    c.checked = parentCheckbox.checked;
+  });
+}
+
+/* ================= 子層控制父層 ================= */
+function updateParentCheckbox(childCheckbox) {
+  const parentGroup = childCheckbox.dataset.parent;
+  if(!parentGroup) return;
+
+  const parent = document.querySelector(`#modal input[data-group="${parentGroup}"]`);
+  const children = document.querySelectorAll(`#modal input[data-parent="${parentGroup}"]`);
+
+  const allChecked = Array.from(children).every(c => c.checked);
+  parent.checked = allChecked;
+}
+
+/* ================= TOP ================= */
+const topBtn = document.getElementById('topBtn');
+window.addEventListener('scroll',()=>{ topBtn.style.display = window.scrollY>120?'block':'none'; });
+function scrollToTop(){ window.scrollTo({top:0,behavior:'smooth'}); }
+
+render();
+</script>
+
+</body>
+</html>

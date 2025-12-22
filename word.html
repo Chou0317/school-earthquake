@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>文件下載</title>
+
+  <!-- 全域樣式區：定義顏色、圓角、陰影及字型等變數，方便統一調整樣式 -->
+  <style>
+    :root{
+      --bg: #6c6c6c;             /* 頁面背景顏色 */
+      --card: #ffffff;           /* 卡片白色底 */
+      --primary: #002b88;        /* 主深藍色（標題背景） */
+      --primary-light: #3b82f6;  /* 次要亮藍色（按鈕） */
+      --danger: #ef4444;         /* 紅色：刪除按鈕 */
+      --muted: #6b7280;          /* 淺色字體 */
+      --shadow: 0 6px 18px rgba(15,23,42,0.08);  /* 卡片陰影 */
+      --radius: 12px;              /* 卡片與按鈕的圓角 */
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+    }
+
+    html,body{height:100%;}
+    body{
+      margin:0;
+      background:var(--bg);
+      display:flex;
+      align-items:flex-start;   /* 卡片靠上 */
+      justify-content:center;   /* 卡片置中 */
+      padding:24px;
+    }
+
+    /* 主卡片樣式 */
+    .card{
+      width:100%;
+      max-width:920px;
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      box-sizing:border-box;
+      margin-top:20px;
+      overflow:hidden;
+    }
+
+    /* 卡片 Header（主標題區） */
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:16px 20px;
+      background:var(--primary);  /* 使用主色 */
+      color:white;
+    }
+
+    .title{
+      font-size:20px;
+      font-weight:600;
+    }
+
+    .actions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+
+    /* 通用按鈕樣式 */
+    .btn{
+      border:0;
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:14px;
+    }
+    .btn-primary{background:var(--primary-light); color:white}
+    .btn-ghost{background:transparent; color:white; border:1px solid rgba(255,255,255,0.6)}
+    .btn-danger{background:var(--danger); color:white}
+
+    /* 列表樣式 */
+    .list{
+      width:100%;
+      border-top:1px solid #eee;
+      border-bottom:1px solid #eee;
+      margin-top:0;
+    }
+
+    .list-row{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 8px;
+      border-bottom:1px solid #f2f2f2;
+    }
+
+    /* 欄位配置：固定寬度 + 彈性標題區 */
+    .col-1{width:60px; flex-shrink:0; text-align:center; color:var(--muted)}
+    .col-2{flex:1; min-width:160px;}
+    .col-3{width:90px; flex-shrink:0; text-align:center}
+    .col-4{width:90px; flex-shrink:0; text-align:center}
+    .col-5{width:90px; flex-shrink:0; text-align:center}
+
+    .list-head{
+      display:flex;
+      gap:12px;
+      padding:10px 8px;
+      align-items:center;
+      color:var(--muted);
+      font-weight:700;
+      background:#f9fafb;
+    }
+
+    .icon-btn{
+      padding:6px 8px;
+      border-radius:8px;
+      border:1px solid rgba(0,0,0,0.06);
+      background:transparent;
+      cursor:pointer;
+      font-weight:600;
+    }
+
+    .file-name{
+      word-break:break-all;
+    }
+
+    .empty{padding:28px;text-align:center;color:var(--muted)}
+
+    /* Modal（新增/編輯文件彈窗） */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:flex;align-items:center;justify-content:center}
+    .modal{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:0;
+      max-width:560px;
+      width:92%;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .modal-header{
+      padding:16px 20px;
+      background:var(--primary);
+      color:white;
+      font-size:18px;
+      font-weight:600;
+    }
+
+    .modal-body{
+      padding:18px;
+    }
+
+    .form-row{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+    .form-row label{font-size:13px;color:var(--muted)}
+    .form-row input[type="text"], .form-row input[type="file"]{padding:8px;border-radius:8px;border:1px solid #e6e6e6}
+
+    .modal-footer{
+      display:flex;
+      gap:8px;
+      justify-content:flex-end;
+      padding:12px 18px;
+      background:#f9fafb;
+    }
+
+    @media (max-width:640px){
+      .col-1{width:48px}
+      .col-3,.col-4,.col-5{width:70px}
+    }
+  </style>
+</head>
+<body>
+  <!-- 主文件下載卡片 -->
+  <div class="card" role="region" aria-label="文件下載卡片">
+    <!-- 標題列：文件下載 + 新增按鈕 -->
+    <div class="header">
+      <div class="title">文件下載</div>
+      <div class="actions">
+        <button id="addBtn" class="btn btn-primary">＋ 新增文件</button>
+      </div>
+    </div>
+
+    <!-- 表title -->
+    <div class="list">
+      <div class="list-head">
+        <div class="col-1">序號</div>
+        <div class="col-2">標題</div>
+        <div class="col-3">下載</div>
+        <div class="col-4">編輯</div>
+        <div class="col-5">刪除</div>
+      </div>
+
+      <div id="rowsContainer">
+        <!-- 初始時顯示空白提示 -->
+        <div class="empty">目前沒有文件。請按「新增文件」上傳檔案或建立條目。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal：新增/編輯文件 -->
+  <div id="modal" style="display:none">
+    <div class="modal-backdrop" id="backdrop">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <!-- Modal 標題列：與主卡片同樣藍色 -->
+        <div class="modal-header" id="modalTitle">新增文件</div>
+        <div class="modal-body">
+          <!-- 標題輸入 -->
+          <div class="form-row">
+            <label for="inputTitle">標題</label>
+            <input id="inputTitle" type="text" placeholder="輸入文件標題（必填）" />
+          </div>
+          <!-- 選擇檔案：可不選，用於純建立條目 -->
+          <div class="form-row">
+            <label for="inputFile">選擇檔案（可不選，僅建立連結）</label>
+            <input id="inputFile" type="file" accept="*" />
+          </div>
+        </div>
+        <!-- Modal 按鈕列 -->
+        <div class="modal-footer">
+          <button class="btn btn-ghost" id="cancelBtn">取消</button>
+          <button class="btn btn-primary" id="saveBtn">儲存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主邏輯：資料管理、渲染、事件綁定 -->
+  <script>
+    const items = [];         // 儲存所有文件資料
+    const rowsContainer = document.getElementById('rowsContainer');
+    const addBtn = document.getElementById('addBtn');
+    const modal = document.getElementById('modal');
+    const backdrop = document.getElementById('backdrop');
+    const inputTitle = document.getElementById('inputTitle');
+    const inputFile = document.getElementById('inputFile');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const saveBtn = document.getElementById('saveBtn');
+    let editingId = null;    // null = 新增模式，不是 null = 編輯模式
+
+    /* 渲染畫面：根據 items 陣列內容更新列表 */
+    function render() {
+      rowsContainer.innerHTML = '';
+      if(items.length === 0){
+        const d = document.createElement('div');
+        d.className='empty';
+        d.textContent = '目前沒有文件。請按「新增文件」上傳檔案或建立條目。';
+        rowsContainer.appendChild(d);
+        return;
+      }
+
+      items.forEach((it, idx) => {
+        const row = document.createElement('div');
+        row.className = 'list-row';
+
+        // 序號
+        const c1 = document.createElement('div'); c1.className='col-1'; c1.textContent = idx+1;
+        // 標題
+        const c2 = document.createElement('div'); c2.className='col-2';
+        const name = document.createElement('div'); name.className='file-name'; name.textContent = it.title || (it.file? it.file.name : '(無標題)');
+        c2.appendChild(name);
+
+        // 下載
+        const c3 = document.createElement('div'); c3.className='col-3';
+        if(it.url){
+          const a = document.createElement('a');
+          a.href = it.url; a.download = it.file? it.file.name : (it.title || 'file');
+          a.className = 'icon-btn';
+          a.textContent = '下載';
+          c3.appendChild(a);
+        } else {
+          const span = document.createElement('span'); span.style.color='var(--muted)'; span.textContent='無檔案'; c3.appendChild(span);
+        }
+
+        // 編輯
+        const c4 = document.createElement('div'); c4.className='col-4';
+        const editBtn = document.createElement('button'); editBtn.className='icon-btn'; editBtn.textContent='編輯';
+        editBtn.addEventListener('click',()=> openEdit(it.id));
+        c4.appendChild(editBtn);
+
+        // 刪除
+        const c5 = document.createElement('div'); c5.className='col-5';
+        const delBtn = document.createElement('button'); delBtn.className='icon-btn'; delBtn.textContent='刪除';
+        delBtn.addEventListener('click',()=> deleteItem(it.id));
+        c5.appendChild(delBtn);
+
+        row.appendChild(c1); row.appendChild(c2); row.appendChild(c3); row.appendChild(c4); row.appendChild(c5);
+        rowsContainer.appendChild(row);
+      });
+    }
+
+    /* 新增文件：開啟 Modal */
+    function openModal(){
+      modal.style.display='block';
+      inputTitle.value='';
+      inputFile.value='';
+      editingId = null;
+      document.getElementById('modalTitle').textContent = '新增文件';
+      setTimeout(()=> inputTitle.focus(),50);
+    }
+
+    /* 關閉 Modal */
+    function closeModal(){
+      modal.style.display='none';
+    }
+
+    /* 編輯文件：載入資料到輸入框 */
+    function openEdit(id){
+      const it = items.find(x=>x.id===id);
+      if(!it) return;
+      editingId = id;
+      document.getElementById('modalTitle').textContent = '編輯文件';
+      inputTitle.value = it.title || '';
+      inputFile.value = '';
+      modal.style.display='block';
+    }
+
+    /* 刪除文件 */
+    function deleteItem(id){
+      if(!confirm('確定要刪除此文件嗎？')) return;
+      const idx = items.findIndex(x=>x.id===id);
+      if(idx===-1) return;
+      // 釋放 URL blob
+      if(items[idx].url) URL.revokeObjectURL(items[idx].url);
+      items.splice(idx,1);
+      render();
+    }
+
+    /* 綁定按鈕事件 */
+    addBtn.addEventListener('click', openModal);
+    cancelBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', (e)=>{ if(e.target===backdrop) closeModal(); });
+
+    /* 儲存：新增或更新 */
+    saveBtn.addEventListener('click', ()=>{
+      const title = inputTitle.value.trim();
+      const file = inputFile.files && inputFile.files[0] ? inputFile.files[0] : null;
+      if(!title && !file){
+        alert('請至少輸入標題或選擇檔案');
+        return;
+      }
+
+      if(editingId){
+        // 編輯更新
+        const it = items.find(x=>x.id===editingId);
+        if(!it) return;
+        if(file){
+          if(it.url) URL.revokeObjectURL(it.url);
+          it.file = file;
+          it.url = URL.createObjectURL(file);
+        }
+        it.title = title || it.title || file.name;
+      } else {
+        // 新增
+        const id = crypto.randomUUID();
+        const newItem = {id, title: title || (file? file.name : '無標題'), file:null, url:null};
+        if(file){ newItem.file = file; newItem.url = URL.createObjectURL(file); }
+        items.push(newItem);
+      }
+
+      closeModal();
+      render();
+    });
+
+    render(); /* 初始渲染 */
+  </script>
+</body>
+</html>

@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>事件紀錄</title>
+
+<style>
+:root{
+  --bg:#6c6c6c;
+  --card:#ffffff;
+  --primary:#002b88;
+  --primary-light:#3b82f6;
+  --danger:#ef4444;
+  --muted:#6b7280;
+  --shadow:0 6px 18px rgba(15,23,42,0.08);
+  --radius:12px;
+  font-family:-apple-system, BlinkMacSystemFont,'Segoe UI', Roboto,'Noto Sans TC','Microsoft JhengHei',sans-serif;
+}
+
+html,body{ 
+  height:100%; 
+  margin:0; 
+  background:var(--bg); 
+}
+
+body{ 
+  padding:24px; 
+  display:flex; 
+  justify-content:center; 
+}
+
+.card{ 
+  width:100%; 
+  max-width:980px; 
+  background:var(--card); 
+  border-radius:var(--radius); 
+  box-shadow:var(--shadow); 
+  overflow:hidden; 
+  display:flex; 
+  flex-direction:column; 
+  height:95vh; 
+}
+
+/* header */
+.header{ 
+  display:flex; 
+  align-items:center; 
+  justify-content:space-between; 
+  gap:12px; 
+  padding:16px 20px; 
+  background:var(--primary); 
+  color:white; 
+}
+
+.title{ 
+  font-size:20px; 
+  font-weight:600; 
+}
+
+/* 搜尋區 */
+.search-row { 
+  display:flex; 
+  align-items:center; 
+  gap:12px; 
+  padding:12px 20px; 
+  background:#f9fafb; 
+  border-radius:8px; 
+  margin:0 16px 12px 16px; 
+  flex-wrap:wrap; 
+}
+
+.search-row .form-group{ 
+  display:flex; 
+  align-items:center; 
+  gap:6px; 
+}
+
+.search-row label{ 
+  font-size:15px; 
+  font-weight:500; 
+  color:var(--muted); 
+  white-space:nowrap; 
+  line-height:32px; 
+}
+
+.search-row input[type=date], .search-row select{ 
+  height:32px; 
+  padding:4px 8px; 
+  border-radius:6px; 
+  border:1px solid #ccc; 
+  font-size:14px; 
+  background:#fff; 
+}
+
+.btn-search{ 
+  height:32px; 
+  padding:0 14px; 
+  border-radius:6px; 
+  background:var(--primary-light); 
+  color:#fff; 
+  border:none; 
+  cursor:pointer; 
+  font-weight:600; 
+  font-size:14px; 
+  display:flex; 
+  align-items:center; 
+  justify-content:center; 
+}
+
+.btn-close{
+  height:32px;
+  padding:0 16px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  background:#ffffff;
+  color:#374151;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.btn-cancel:hover{
+  background:#f3f4f6;
+}
+
+/* 計數文字 */
+#countText{ 
+  padding:8px 20px; 
+  color:var(--muted); 
+}
+
+/* 列表 */
+.list-wrapper{ 
+  flex:1; 
+  overflow-y:auto; 
+}
+
+.list{ 
+  width:100%; 
+  border-top:1px solid #eee; 
+  border-bottom:1px solid #eee; 
+  margin-top:0; 
+}
+
+.list-head{ 
+  display:flex; 
+  gap:12px; 
+  padding:10px 8px; 
+  align-items:center; 
+  color:var(--muted); 
+  font-weight:700; 
+  background:#f9fafb; 
+  position:sticky; 
+  top:0; z-index:2; 
+}
+
+.list-row{ 
+  display:flex; 
+  align-items:center; 
+  gap:12px; 
+  padding:12px 8px; 
+  border-bottom:1px solid #f2f2f2; 
+}
+
+.col-1{ 
+  width:60px; 
+  flex-shrink:0; 
+  text-align:center; 
+  color:var(--muted); 
+}
+
+.col-2,.col-3{ 
+  flex:1; 
+  min-width:140px; 
+}
+
+.col-4,.col-5{ 
+  width:120px; 
+  flex-shrink:0; 
+  text-align:center; 
+}
+
+.col-6{ 
+  width:90px; 
+  flex-shrink:0; 
+  text-align:center; 
+}
+
+.icon-btn{ 
+  padding:6px 8px; 
+  border-radius:8px; 
+  border:1px solid rgba(0,0,0,0.06); 
+  background:transparent; 
+  cursor:pointer; 
+  font-weight:600; 
+}
+
+.empty{ 
+  padding:28px; 
+  text-align:center; 
+  color:var(--muted); 
+}
+
+/* modal */
+.modal-backdrop{ 
+  position:fixed; 
+  inset:0; 
+  background:rgba(2,6,23,0.45); 
+  display:none; 
+  align-items:center; 
+  justify-content:center; 
+  z-index:100; 
+}
+
+.modal{ 
+  background:var(--card); 
+  border-radius:var(--radius); 
+  padding:0; 
+  max-width:640px; 
+  width:92%; 
+  box-shadow:var(--shadow); 
+  overflow:hidden; 
+}
+
+.modal-header{ 
+  padding:16px 20px; 
+  background:var(--primary); 
+  color:white; 
+  font-size:18px; 
+  font-weight:600; 
+}
+
+.modal-body{ 
+  padding:18px; 
+  color:#111; 
+  max-height:60vh; 
+  overflow:auto; 
+}
+
+.modal-footer{ 
+  display:flex; 
+  gap:8px; 
+  justify-content:flex-end; 
+  padding:12px 18px; 
+  background:#f9fafb; 
+}
+
+/* top 按鈕 */
+#topBtn{ 
+  position:fixed; 
+  right:20px; 
+  bottom:20px; 
+  width:44px; 
+  height:44px; 
+  background:var(--primary-light); 
+  color:white; 
+  border:none; 
+  border-radius:8px; 
+  display:none; 
+  align-items:center; 
+  justify-content:center; 
+  cursor:pointer; 
+  z-index:200; 
+}
+
+#topBtn:hover{ 
+  background:#0056b3; 
+}
+
+/* small screens */
+@media (max-width:720px){
+  .list-head{ font-size:13px; }
+  .col-2,.col-3{ min-width:80px; }
+  .search-row{ gap:8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="card" id="mainCard">
+  <div class="header"><div class="title">事件紀錄</div></div>
+
+  <!-- 搜尋區 -->
+  <div class="search-row">
+    <div class="form-group">
+      <label for="magSelect">芮氏規模</label>
+      <select id="magSelect" aria-label="芮氏規模">
+        <option value="-">-</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5-">5弱</option>
+        <option value="5+">5強</option>
+        <option value="6-">6弱</option>
+        <option value="6+">6強</option>
+        <option value="7">7</option>
+      </select>
+    </div>
+
+    <!-- 日期區間 -->
+    <div class="form-group">
+      <label for="startDate">開始日期</label>
+      <input type="date" id="startDate">
+    </div>
+    <div class="form-group">
+      <label for="endDate">結束日期</label>
+      <input type="date" id="endDate">
+    </div>
+
+    <button class="btn-search" onclick="searchEvents()">搜尋</button>
+  </div>
+
+  <div id="countText">共 0 筆資料</div>
+
+  <div class="list-wrapper">
+    <div class="list">
+      <div class="list-head">
+        <div class="col-1">序號</div>
+        <div class="col-2">發生時間</div>
+        <div class="col-3">芮氏規模</div>
+        <div class="col-4">震央</div>
+        <div class="col-5">深度(km)</div>
+        <div class="col-6">明細</div>
+      </div>
+      <div id="rowsContainer">
+        <div class="empty">載入中...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- modal -->
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal" role="document" aria-labelledby="modalTitle">
+    <div class="modal-header" id="modalTitle">事件明細</div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <button class="btn-close" onclick="closeModal()">關閉</button>
+    </div>
+  </div>
+</div>
+
+<button id="topBtn" onclick="scrollToTop()">TOP</button>
+
+<script>
+// ---------- 假資料 ----------
+let events = [
+  {id:'E20251209A', datetime:'2025-12-09T11:02:15', magnitude:4.2, epicenter:'宜蘭縣 外海', depth:35, lat:24.7, lon:121.9, affected:{'台北市':['內湖區','大安區'],'新北市':['板橋區','新店區']}},
+  {id:'E20251202B', datetime:'2025-12-02T03:12:05', magnitude:3.1, epicenter:'花蓮縣 市區外', depth:18, lat:23.9, lon:121.6, affected:{'花蓮縣':['花蓮市']}},
+  {id:'E20251130C', datetime:'2025-11-30T21:45:00', magnitude:5.5, epicenter:'高雄市 左營區近海', depth:12, lat:22.7, lon:120.3, affected:{'高雄市':['左營區','苓雅區'],'屏東縣':['潮州鎮']}},
+  {id:'E20250215D', datetime:'2025-02-15T09:22:55', magnitude:2.6, epicenter:'台中市 西屯區', depth:8, lat:24.16, lon:120.63, affected:{'台中市':['西屯區']}},
+  {id:'E20191201E', datetime:'2019-12-01T14:10:12', magnitude:3.9, epicenter:'基隆市 外海', depth:28, lat:25.1, lon:121.7, affected:{'基隆市':['中正區']}}
+];
+events.sort((a,b)=>new Date(b.datetime)-new Date(a.datetime));
+
+// ---------- DOM ----------
+const rowsContainer=document.getElementById('rowsContainer');
+const countText=document.getElementById('countText');
+const modalBackdrop=document.getElementById('modalBackdrop');
+const modalBody=document.getElementById('modalBody');
+
+// ---------- 渲染列表 ----------
+function render(list){
+  rowsContainer.innerHTML='';
+  if(!list||list.length===0){ 
+    rowsContainer.innerHTML='<div class="empty">查無資料</div>'; 
+    countText.textContent='共 0 筆資料'; 
+    return;
+  }
+  countText.textContent='共 '+list.length+' 筆資料';
+  list.forEach((e,idx)=>{
+    const dt=new Date(e.datetime);
+    const row=document.createElement('div'); 
+    row.className='list-row';
+    row.innerHTML=`
+      <div class="col-1">${idx+1}</div>
+      <div class="col-2">${formatDateTime(dt)}</div>
+      <div class="col-3">${e.magnitude.toFixed(1)}</div>
+      <div class="col-4">${escapeHtml(e.epicenter)}</div>
+      <div class="col-5">${e.depth??'-'}</div>
+      <div class="col-6"><button class="icon-btn" onclick="viewDetail('${e.id}')">明細</button></div>
+    `;
+    rowsContainer.appendChild(row);
+  });
+}
+
+// 格式化時間
+function formatDateTime(d){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,'0');
+  const day=String(d.getDate()).padStart(2,'0');
+  const hh=String(d.getHours()).padStart(2,'0');
+  const mm=String(d.getMinutes()).padStart(2,'0');
+  const ss=String(d.getSeconds()).padStart(2,'0');
+  return `${y}-${m}-${day} ${hh}:${mm}:${ss}`;
+}
+
+// HTML escape
+function escapeHtml(s){return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');}
+
+// ---------- 搜尋事件 ----------
+function searchEvents(){
+  const magVal=document.getElementById('magSelect').value;
+  const startDate=document.getElementById('startDate').value; // YYYY-MM-DD
+  const endDate=document.getElementById('endDate').value;
+
+  let filtered = events.slice();
+
+  // 芮氏規模篩選
+  if(magVal!='-'){
+    let minMag=parseFloat(magVal.replace(/[^\d.]/g,''));
+    filtered=filtered.filter(e=>e.magnitude>=minMag);
+  }
+
+  // 日期區間篩選
+  if(startDate){
+    filtered=filtered.filter(e=>{
+      const d = e.datetime.slice(0,10);
+      return d >= startDate;
+    });
+  }
+  if(endDate){
+    filtered=filtered.filter(e=>{
+      const d = e.datetime.slice(0,10);
+      return d <= endDate;
+    });
+  }
+
+  filtered.sort((a,b)=>new Date(b.datetime)-new Date(a.datetime));
+  render(filtered);
+}
+
+// ---------- 明細 modal ----------
+function viewDetail(id){
+  const e = events.find(x=>x.id===id);
+  if(!e) return alert('找不到事件資料');
+  modalBody.innerHTML='';
+  const title=document.createElement('div'); 
+  title.style.fontWeight='700'; title.style.marginBottom='8px';
+  title.textContent=`事件 ${escapeHtml(e.id)} - ${formatDateTime(new Date(e.datetime))}`;
+  modalBody.appendChild(title);
+
+  const info=document.createElement('div');
+  info.innerHTML=`
+    <p>芮氏規模：<strong>${e.magnitude.toFixed(1)}</strong></p>
+    <p>震央：${escapeHtml(e.epicenter)}（緯度 ${e.lat??'-'}，經度 ${e.lon??'-'}）</p>
+    <p>深度：${e.depth??'-'} km</p>
+  `;
+  modalBody.appendChild(info);
+
+  const affectedTitle=document.createElement('div'); affectedTitle.style.marginTop='12px'; affectedTitle.style.fontWeight='700';
+  affectedTitle.textContent='影響縣市 / 鄉鎮'; modalBody.appendChild(affectedTitle);
+  const affectedDiv=document.createElement('div'); affectedDiv.style.marginTop='8px';
+  const affected=e.affected||{};
+  if(Object.keys(affected).length===0){affectedDiv.textContent='無已知影響區域資料';}
+  else{
+    for(const county of Object.keys(affected)){
+      const group=document.createElement('div'); group.style.marginBottom='8px';
+      const countyTitle=document.createElement('div'); countyTitle.style.fontWeight='600';
+      countyTitle.textContent=county+'：';
+      group.appendChild(countyTitle);
+      const ul=document.createElement('ul'); ul.style.marginTop='4px'; ul.style.marginLeft='18px';
+      (affected[county]||[]).forEach(town=>{
+        const li=document.createElement('li'); li.textContent=town; ul.appendChild(li);
+      });
+      group.appendChild(ul);
+      affectedDiv.appendChild(group);
+    }
+  }
+  modalBody.appendChild(affectedDiv);
+  openModal();
+}
+
+function openModal(){ modalBackdrop.style.display='flex'; modalBackdrop.setAttribute('aria-hidden','false'); }
+function closeModal(){ modalBackdrop.style.display='none'; modalBackdrop.setAttribute('aria-hidden','true'); }
+modalBackdrop.addEventListener('click', ev=>{ if(ev.target===modalBackdrop) closeModal(); });
+
+// ---------- TOP 按鈕 ----------
+const topBtn=document.getElementById('topBtn');
+window.addEventListener('scroll',()=>{ topBtn.style.display=(window.scrollY>120)?'flex':'none'; });
+function scrollToTop(){ window.scrollTo({top:0,behavior:'smooth'}); }
+
+// ---------- 初始化 ----------
+(function init(){
+  render(events); // 先渲染所有假資料
+})();
+</script>
+
+</body>
+</html>

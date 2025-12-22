@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>地震發報設定</title>
+
+<style>
+/* ================= 全局變數 ================= */
+:root{
+  --bg:#6c6c6c;
+  --card:#ffffff;
+  --primary:#002b88;
+  --primary-light:#3b82f6;
+  --muted:#6b7280;
+  --shadow:0 6px 18px rgba(15,23,42,0.08);
+  --radius:12px;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans TC','Microsoft JhengHei',sans-serif;
+}
+
+html,body{
+  height:100%;
+  margin:0;
+  background:var(--bg);
+}
+
+body{
+  padding:24px;
+  display:flex;
+  justify-content:center;
+}
+
+/* ================= 卡片 ================= */
+.card{
+  width:100%;
+  max-width:1000px;
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+
+/* ================= header ================= */
+.header{
+  padding:16px 20px;
+  background:var(--primary);
+  color:#fff;
+  font-size:20px;
+  font-weight:600;
+}
+
+/* ================= 搜尋區 ================= */
+.search-row{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  padding:12px 20px;
+  background:#f9fafb;
+  flex-wrap:wrap;
+}
+
+.search-row label{
+  color:var(--muted);
+  font-weight:500;
+}
+
+.search-row select{
+  height:32px;
+  padding:4px 8px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+.btn-search{
+  height:32px;
+  padding:0 16px;
+  border:none;
+  border-radius:6px;
+  background:var(--primary-light);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.btn-cancel{
+  height:32px;
+  padding:0 16px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  background:#ffffff;
+  color:#374151;
+  font-weight:600;
+  cursor:pointer;
+}
+
+.btn-cancel:hover{
+  background:#f3f4f6;
+}
+
+/* ================= 列表 ================= */
+.count{
+  padding:8px 20px;
+  color:var(--muted);
+}
+
+.list{
+  border-top:1px solid #eee;
+}
+
+.list-head,
+.list-row{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  padding:10px 8px;
+}
+
+.list-head{
+  background:#f9fafb;
+  font-weight:700;
+  color:var(--muted);
+}
+
+.list-row{
+  border-top:1px solid #f2f2f2;
+}
+
+.col-1{width:50px;text-align:center;}
+.col-2{width:120px;}
+.col-3{width:100px;}
+.col-4{width:120px;}
+.col-5{flex:1;}
+.col-6{flex:1;}
+.col-7{width:110px;text-align:center;}
+
+.icon-btn{
+  padding:6px 10px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  background:#fff;
+  cursor:pointer;
+}
+
+.empty{
+  padding:28px;
+  text-align:center;
+  color:var(--muted);
+}
+
+/* ================= modal ================= */
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+}
+
+.modal{
+  background:#fff;
+  border-radius:12px;
+  width:92%;
+  max-width:520px;
+  overflow:hidden;
+}
+
+.modal-header{
+  padding:14px 18px;
+  background:var(--primary);
+  color:#fff;
+  font-weight:600;
+}
+
+.modal-body{
+  padding:18px;
+}
+
+.modal-footer{
+  padding:12px 18px;
+  background:#f9fafb;
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+}
+
+.modal-body .form-group{
+  margin-bottom:14px;
+}
+
+.modal-body label{
+  display:block;
+  font-weight:600;
+  margin-bottom:6px;
+}
+
+.modal-body input,
+.modal-body select{
+  width:100%;
+  height:34px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  padding:4px 8px;
+}
+
+.modal-body input[disabled]{
+  background:#f3f4f6;
+}
+
+/* ================= TOP ================= */
+#topBtn{
+  position:fixed;
+  right:20px;
+  bottom:20px;
+  width:44px;
+  height:44px;
+  border:none;
+  border-radius:8px;
+  background:var(--primary-light);
+  color:#fff;
+  display:none;
+  cursor:pointer;
+  z-index:200;
+}
+</style>
+</head>
+
+<body>
+<div class="card">
+
+  <div class="header">地震發報設定</div>
+
+  <!-- 搜尋 -->
+  <div class="search-row">
+    <label>縣市</label>
+    <select id="citySelect"></select>
+
+    <label>鄉鎮</label>
+    <select id="townSelect"></select>
+
+    <button class="btn-search" onclick="search()">搜尋</button>
+  </div>
+
+  <div class="count" id="countText">共 0 筆資料</div>
+
+  <!-- 列表 -->
+  <div class="list">
+    <div class="list-head">
+      <div class="col-1">序號</div>
+      <div class="col-2">ID</div>
+      <div class="col-3">縣市</div>
+      <div class="col-4">鄉鎮</div>
+      <div class="col-5">名稱</div>
+      <div class="col-6">發報設定</div>
+      <div class="col-7">操作</div>
+    </div>
+    <div id="rows"></div>
+  </div>
+</div>
+
+<!-- 發報設定 Modal -->
+<div class="modal-backdrop" id="settingModal">
+  <div class="modal">
+    <div class="modal-header">發報設定</div>
+
+    <div class="modal-body">
+      <div class="form-group">
+        <label>ID</label>
+        <input id="setId" disabled />
+      </div>
+
+      <div class="form-group">
+        <label>發報門檻</label>
+        <select id="setThreshold">
+          <option>1級</option>
+          <option>2級</option>
+          <option>3級</option>
+          <option>4級</option>
+          <option>5弱</option>
+          <option>5強</option>
+          <option>6弱</option>
+          <option>6強</option>
+          <option>7級</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>發報時間（24 小時制）</label>
+        <div style="display:flex;gap:6px;align-items:center">
+          <select id="startH"></select>：
+          <select id="startM"></select>
+          <span>～</span>
+          <select id="endH"></select>：
+          <select id="endM"></select>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-search" onclick="saveSetting()">儲存</button>
+      <button class="btn-cancel" onclick="closeSetting()">取消</button>
+    </div>
+  </div>
+</div>
+
+<button id="topBtn" onclick="scrollToTop()">TOP</button>
+
+<script>
+/* ================= 假資料 ================= */
+const data=[
+ {id:'A001',city:'台北市',town:'內湖區',name:'主機一',threshold:'5弱',start:'08:00',end:'18:00'},
+ {id:'A002',city:'新北市',town:'板橋區',name:'主機二',threshold:'6弱',start:'00:00',end:'23:59'},
+ {id:'A003',city:'台北市',town:'大安區',name:'主機三',threshold:'4級',start:'09:00',end:'17:30'}
+];
+
+const cityTown={
+ '台北市':['內湖區','大安區'],
+ '新北市':['板橋區','新店區']
+};
+
+let currentSetting=null;
+
+/* ================= 下拉初始化 ================= */
+const citySel=document.getElementById('citySelect');
+const townSel=document.getElementById('townSelect');
+
+citySel.innerHTML='<option value="-">-</option>';
+Object.keys(cityTown).forEach(c=>{
+ citySel.innerHTML+=`<option>${c}</option>`;
+});
+
+citySel.onchange=()=>{
+ townSel.innerHTML='<option value="-">-</option>';
+ (cityTown[citySel.value]||[]).forEach(t=>{
+  townSel.innerHTML+=`<option>${t}</option>`;
+ });
+};
+
+/* ================= 時間選單 ================= */
+function initTimeSelect(){
+ ['startH','endH'].forEach(id=>{
+  const sel=document.getElementById(id);
+  for(let i=0;i<24;i++){
+    sel.innerHTML+=`<option>${String(i).padStart(2,'0')}</option>`;
+  }
+ });
+ ['startM','endM'].forEach(id=>{
+  const sel=document.getElementById(id);
+  for(let i=0;i<60;i++){
+    sel.innerHTML+=`<option>${String(i).padStart(2,'0')}</option>`;
+  }
+ });
+}
+initTimeSelect();
+
+/* ================= 渲染 ================= */
+function render(list){
+ const rows=document.getElementById('rows');
+ rows.innerHTML='';
+ document.getElementById('countText').textContent=`共 ${list.length} 筆資料`;
+
+ if(!list.length){
+  rows.innerHTML='<div class="empty">查無資料</div>';
+  return;
+ }
+
+ list.forEach((e,i)=>{
+  rows.innerHTML+=`
+  <div class="list-row">
+    <div class="col-1">${i+1}</div>
+    <div class="col-2">${e.id}</div>
+    <div class="col-3">${e.city}</div>
+    <div class="col-4">${e.town}</div>
+    <div class="col-5">${e.name}</div>
+    <div class="col-6">${e.threshold} / ${e.start}～${e.end}</div>
+    <div class="col-7">
+      <button class="icon-btn" onclick="openSetting('${e.id}')">發報設定</button>
+    </div>
+  </div>`;
+ });
+}
+
+/* ================= 搜尋 ================= */
+function search(){
+ const c=citySel.value,t=townSel.value;
+ const f=data.filter(e=>(c=='-'||e.city==c)&&(t=='-'||e.town==t));
+ render(f);
+}
+
+/* ================= 發報設定 ================= */
+function openSetting(id){
+ const e=data.find(x=>x.id===id);
+ if(!e) return;
+
+ currentSetting=e;
+ setId.value=e.id;
+ setThreshold.value=e.threshold;
+
+ const [sh,sm]=e.start.split(':');
+ const [eh,em]=e.end.split(':');
+
+ startH.value=sh;
+ startM.value=sm;
+ endH.value=eh;
+ endM.value=em;
+
+ settingModal.style.display='flex';
+}
+
+function saveSetting(){
+ currentSetting.threshold=setThreshold.value;
+ currentSetting.start=`${startH.value}:${startM.value}`;
+ currentSetting.end=`${endH.value}:${endM.value}`;
+
+ closeSetting();
+ render(data);
+
+ // 👉 未來 API 在這裡送
+}
+
+function closeSetting(){
+ settingModal.style.display='none';
+}
+
+/* ================= TOP ================= */
+const topBtn=document.getElementById('topBtn');
+window.addEventListener('scroll',()=>{
+ topBtn.style.display=window.scrollY>120?'block':'none';
+});
+function scrollToTop(){
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ================= init ================= */
+render(data);
+</script>
+</body>
+</html>
