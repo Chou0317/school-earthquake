@@ -18,32 +18,187 @@
   font-family:-apple-system, BlinkMacSystemFont,'Segoe UI', Roboto,'Noto Sans TC','Microsoft JhengHei',sans-serif;
 }
 /* =========================== 基本頁面樣式 =========================== */
-html,body{ height:100%; margin:0; background:var(--bg); }
-body{ padding:24px; display:flex; justify-content:center; }
+html,body{ 
+    height:100%; 
+    margin:0; 
+    background:var(--bg); 
+}
+
+body{ 
+    padding:24px; 
+    display:flex; 
+    justify-content:center; 
+}
+
 /* =========================== 卡片容器 =========================== */
-.card{ width:100%; max-width:980px; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; margin-top:20px; }
+.card{ 
+    width:100%; 
+    max-width:980px; 
+    background:var(--card); 
+    border-radius:var(--radius); 
+    box-shadow:var(--shadow); 
+    overflow:hidden; 
+    margin-top:20px; 
+}
+
 /* =========================== header =========================== */
-.header{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 20px; background:var(--primary); color:white; }
-.title{ font-size:20px; font-weight:600; }
+.header{ 
+    display:flex; 
+    align-items:center; 
+    justify-content:space-between; 
+    gap:12px; 
+    padding:16px 20px; 
+    background:var(--primary); 
+    color:white; 
+}
+
+.title{ 
+    font-size:20px; 
+    font-weight:600; 
+}
+
 /* =========================== 搜尋區 =========================== */
-.search-row{ display:flex; align-items:center; gap:12px; padding:12px 20px; background:#f9fafb; border-radius:8px; margin:0 16px 12px 16px; flex-wrap:wrap; }
-.search-row .form-group{ display:flex; align-items:center; gap:6px; }
-.search-row label{ font-size:15px; font-weight:500; color:var(--muted); white-space:nowrap; line-height:32px; }
-.search-row input{ height:32px; padding:4px 8px; border-radius:6px; border:1px solid #ccc; font-size:14px; }
-.btn-search{ height:32px; padding:0 14px; border-radius:6px; background:var(--primary-light); color:#fff; border:none; cursor:pointer; font-weight:600; font-size:14px; display:flex; align-items:center; justify-content:center; }
+.search-row{ 
+    display:flex; 
+    align-items:center; 
+    gap:12px; 
+    padding:12px 20px; 
+    background:#f9fafb; 
+    border-radius:8px; 
+    margin:0 16px 12px 16px; 
+    flex-wrap:wrap; 
+}
+
+.search-row .form-group{ 
+    display:flex; 
+    align-items:center; 
+    gap:6px; 
+}
+
+.search-row label{ 
+    font-size:15px; 
+    font-weight:500; 
+    color:var(--muted); 
+    white-space:nowrap; 
+    line-height:32px; 
+}
+
+.search-row input{ 
+    height:32px; 
+    padding:4px 8px; 
+    border-radius:6px; 
+    border:1px solid #ccc; 
+    font-size:14px; 
+}
+
+.btn-search{ 
+    height:32px; 
+    padding:0 14px; 
+    border-radius:6px; 
+    background:var(--primary-light); 
+    color:#fff; 
+    border:none; 
+    cursor:pointer; 
+    font-weight:600; 
+    font-size:14px; 
+    display:flex; 
+    align-items:center; 
+    justify-content:center; 
+}
+
 /* =========================== 列表 =========================== */
-.list{ width:100%; border-top:1px solid #eee; border-bottom:1px solid #eee; margin-top:0; }
-.list-head{ display:flex; gap:12px; padding:10px 8px; align-items:center; color:var(--muted); font-weight:700; background:#f9fafb; }
-.list-row{ display:flex; align-items:center; gap:12px; padding:12px 8px; border-bottom:1px solid #f2f2f2; }
-.col-1{ width:60px; flex-shrink:0; text-align:center; color:var(--muted); }
-.col-2,.col-3{ flex:1; min-width:140px; }
-.col-4{ flex:1; min-width:160px; display:flex; gap:6px; align-items:center; }
-.col-4 select{ height:28px; padding:2px 6px; border-radius:6px; border:1px solid #ccc; font-size:14px; }
-.col-4 button{ height:28px; padding:0 10px; border-radius:6px; background:var(--primary-light); color:#fff; border:none; cursor:pointer; font-weight:500; }
-.empty{ padding:28px; text-align:center; color:var(--muted); }
+.list{ 
+    width:100%; 
+    border-top:1px solid #eee; 
+    border-bottom:1px solid #eee; 
+    margin-top:0; 
+}
+
+.list-head{ 
+    display:flex; 
+    gap:12px; 
+    padding:10px 8px; 
+    align-items:center; 
+    color:var(--muted); 
+    font-weight:700; 
+    background:#f9fafb; 
+}
+
+.list-row{ 
+    display:flex; 
+    align-items:center; 
+    gap:12px; 
+    padding:12px 8px; 
+    border-bottom:1px solid #f2f2f2; 
+}
+
+.col-1{ 
+    width:60px; 
+    flex-shrink:0; 
+    text-align:center; 
+    color:var(--muted); 
+}
+
+.col-2,.col-3{ 
+    flex:1; 
+    min-width:140px; 
+}
+
+.col-4{ 
+    flex:1; 
+    min-width:160px; 
+    display:flex; 
+    gap:6px; 
+    align-items:center; 
+}
+
+.col-4 select{ 
+    height:28px; 
+    padding:2px 6px; 
+    border-radius:6px; 
+    border:1px solid #ccc; 
+    font-size:14px; 
+}
+
+.col-4 button{ 
+    height:28px; 
+    padding:0 10px; 
+    border-radius:6px; 
+    background:var(--primary-light); 
+    color:#fff; 
+    border:none; 
+    cursor:pointer; 
+    font-weight:500; 
+}
+
+.empty{ 
+    padding:28px; 
+    text-align:center; 
+    color:var(--muted); 
+}
+
 /* =========================== TOP 按鈕 =========================== */
-#topBtn{ position:fixed; right:20px; bottom:20px; width:44px; height:44px; background:var(--primary-light); color:white; border:none; border-radius:8px; display:none; align-items:center; justify-content:center; cursor:pointer; z-index:200; }
-#topBtn:hover{ background:#0056b3; }
+#topBtn{ 
+    position:fixed; 
+    right:20px; 
+    bottom:20px; 
+    width:44px; 
+    height:44px; 
+    background:var(--primary-light); 
+    color:white; 
+    border:none; 
+    border-radius:8px; 
+    display:none; 
+    align-items:center; 
+    justify-content:center; 
+    cursor:pointer; 
+    z-index:200; 
+}
+
+#topBtn:hover{ 
+    background:#0056b3; 
+}
+
 /* =========================== 小螢幕響應 =========================== */
 @media (max-width:720px){
   .list-head{ font-size:13px; }
