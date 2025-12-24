@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>帳號管理</title>
+<style>
+:root{
+  --bg:#6c6c6c; --card:#ffffff; --primary:#002b88; --primary-light:#3b82f6;
+  --danger:#ef4444; --muted:#6b7280; --shadow:0 6px 18px rgba(15,23,42,0.08); --radius:12px;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans TC','Microsoft JhengHei',sans-serif;
+}
+html,body{height:100%;margin:0;background:var(--bg);}
+body{padding:24px;display:flex;justify-content:center;}
+.card{width:100%;max-width:1200px;background:var(--card);border-radius:0;box-shadow:var(--shadow);overflow:hidden;}
+.header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:var(--primary);color:#fff;}
+.title{font-size:20px;font-weight:600;}
+.actions{display:flex;gap:8px;}
+.btn{border:0;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;}
+.btn-primary{background:var(--primary-light);color:#fff;}
+.btn-danger{background:var(--danger);color:#fff;}
+.icon-btn{padding:6px 8px;border-radius:8px;border:1px solid rgba(0,0,0,.1);background:#fff;cursor:pointer;}
+.search-row{display:flex;align-items:center;gap:10px;padding:12px 20px;background:#f9fafb;}
+.search-row label{font-weight:500;color:var(--muted);}
+.search-row input[type="text"]{padding:6px 8px;border-radius:6px;border:1px solid #ccc;}
+.list{border-top:1px solid #eee;border-bottom:1px solid #eee;}
+.list-head,.list-row{display:flex;align-items:center;gap:12px;padding:10px 8px;}
+.list-head{background:#f9fafb;font-weight:700;color:var(--muted);}
+.list-row{border-bottom:1px solid #f2f2f2;}
+.col-1{width:60px;text-align:center;color:var(--muted);}
+.col-2,.col-3,.col-4,.col-5,.col-6,.col-7,.col-8,.col-9{flex:1;min-width:100px;text-align:center;}
+.empty{padding:28px;text-align:center;color:var(--muted);}
+#countText{padding:8px 20px;color:var(--muted);}
+.modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,.45);display:flex;align-items:center;justify-content:center;z-index:100;}
+.modal{background:#fff;border-radius:var(--radius);max-width:760px;width:94%;max-height:90vh;display:flex;flex-direction:column;box-shadow:var(--shadow);}
+.modal-body{padding:18px;overflow-y:auto;}
+.modal-header{padding:16px 20px;background:var(--primary);color:#fff;font-size:18px;font-weight:600;}
+.modal-footer{padding:12px 18px;background:#f9fafb;display:flex;gap:8px;justify-content:flex-end;}
+.form-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;}
+.form-row label{width:90px;color:var(--muted);font-weight:500;}
+.form-row input[type="text"], .form-row input[type="password"], .form-row select{flex:1;padding:6px 8px;border-radius:6px;border:1px solid #ccc;}
+.password-wrapper{position:relative;display:flex;align-items:center;}
+.password-wrapper input{flex:1;}
+.password-wrapper button{position:absolute;right:6px;background:none;border:none;cursor:pointer;font-size:14px;}
+#topBtn{position:fixed;right:20px;bottom:20px;width:42px;height:42px;border-radius:8px;background:var(--primary-light);color:#fff;border:none;cursor:pointer;display:none;z-index:200;}
+.add-site-list{margin-top:8px;padding-left:0;}
+.add-site-list div{padding:4px 6px;background:#f0f0f0;border-radius:4px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;}
+.add-site-list div span{cursor:pointer;color:red;font-weight:bold;margin-left:8px;}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <div class="title">帳號管理</div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="openModal()">＋ 新增帳號</button>
+    </div>
+  </div>
+
+  <!-- 搜尋列 -->
+  <div class="search-row">
+    <label>帳號：</label><input type="text" id="searchAccount" placeholder="輸入帳號" />
+    <label>名稱：</label><input type="text" id="searchName" placeholder="輸入名稱" />
+    <button class="btn btn-primary" onclick="searchAccountFunc()">搜尋</button>
+  </div>
+
+  <div id="countText">共 0 筆資料</div>
+
+  <div class="list">
+    <div class="list-head">
+      <div class="col-1">序號</div>
+      <div class="col-2">帳號</div>
+      <div class="col-3">名稱</div>
+      <div class="col-4">群組</div>
+      <div class="col-5">啟用</div>
+      <div class="col-6">案場關聯</div>
+      <div class="col-7">編輯</div>
+      <div class="col-8">刪除</div>
+      <div class="col-9">瀏覽</div>
+    </div>
+    <div id="rowsContainer">
+      <div class="empty">目前沒有帳號資料</div>
+    </div>
+  </div>
+</div>
+
+<!-- 新增/編輯帳號 Modal -->
+<div id="modal" style="display:none">
+  <div class="modal-backdrop" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header" id="modalTitle">新增帳號</div>
+      <div class="modal-body">
+        <div class="form-row"><label>帳號</label><input id="accUsername" type="text" placeholder="輸入帳號" /></div>
+        <div class="form-row password-wrapper"><label>密碼</label>
+          <input id="accPassword" type="password" placeholder="輸入密碼" />
+          <button type="button" onclick="togglePassword()">👁</button>
+        </div>
+        <div class="form-row"><label>名稱</label><input id="accName" type="text" placeholder="輸入名稱" /></div>
+        <div class="form-row"><label>群組</label><select id="accGroup"><option value="">請選擇群組</option></select></div>
+        <div class="form-row"><label>備註</label><input id="accNote" type="text" placeholder="輸入備註" /></div>
+        <div class="form-row"><label>啟用</label><select id="accEnable"><option value="Y">啟用</option><option value="N">停用</option></select></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" id="confirmBtn" onclick="saveAccount()">確認</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 案場關聯 Modal -->
+<div id="siteModal" style="display:none">
+  <div class="modal-backdrop" onclick="closeSiteModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header" id="siteModalTitle">帳號案場關聯</div>
+      <div class="modal-body">
+        <div class="form-row"><label>帳號</label><input id="siteAcc" type="text" disabled /></div>
+        <div class="form-row"><label>名稱</label><input id="siteName" type="text" disabled /></div>
+        <div class="form-row">
+          <label>關聯案場</label>
+          <select id="siteSelect">
+            <option value="">請選擇案場</option>
+            <option value="SiteA">SiteA</option>
+            <option value="SiteB">SiteB</option>
+            <option value="SiteC">SiteC</option>
+          </select>
+          <button class="btn btn-primary" onclick="addSite()">加入</button>
+        </div>
+        <div id="siteList" class="add-site-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" onclick="closeSiteModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveSites()">儲存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button id="topBtn" onclick="scrollToTop()">TOP</button>
+
+<script>
+let accounts=[], editingIndex=null, siteIndex=null;
+
+// ================= 密碼切換眼睛 =================
+function togglePassword(){
+  const pwd=document.getElementById('accPassword');
+  pwd.type = pwd.type==='password'?'text':'password';
+}
+
+// ================= 帳號列表 =================
+function render(){
+  const rowsContainer=document.getElementById('rowsContainer');
+  rowsContainer.innerHTML='';
+  if(accounts.length===0){ rowsContainer.innerHTML='<div class="empty">目前沒有帳號資料</div>'; document.getElementById('countText').textContent='共 0 筆資料'; return; }
+  accounts.forEach((acc,i)=>{
+    const row=document.createElement('div'); row.className='list-row';
+    row.innerHTML=`<div class="col-1">${i+1}</div>
+      <div class="col-2">${acc.username}</div>
+      <div class="col-3">${acc.name}</div>
+      <div class="col-4">${acc.group}</div>
+      <div class="col-5">${acc.enable}</div>
+      <div class="col-6"><button class="icon-btn" onclick="openSiteModal(${i})">案場關聯</button></div>
+      <div class="col-7"><button class="icon-btn" onclick="editAccount(${i})">編輯</button></div>
+      <div class="col-8"><button class="icon-btn" onclick="delAccount(${i})">刪除</button></div>
+      <div class="col-9"><button class="icon-btn" onclick="viewAccount(${i})">瀏覽</button></div>`;
+    rowsContainer.appendChild(row);
+  });
+  document.getElementById('countText').textContent=`共 ${accounts.length} 筆資料`;
+}
+
+// ================= Modal 操作 =================
+function openModal(){ editingIndex=null; document.getElementById('modalTitle').textContent='新增帳號';
+  ['accUsername','accPassword','accName','accGroup','accNote','accEnable'].forEach(id=>{document.getElementById(id).value=''; document.getElementById(id).disabled=false;});
+  document.getElementById('accEnable').value='Y';
+  document.getElementById('confirmBtn').style.display='inline-block';
+  document.getElementById('modal').style.display='block';
+}
+function closeModal(e){ if(e && e.target!==e.currentTarget) return; document.getElementById('modal').style.display='none'; }
+function saveAccount(){ const u=document.getElementById('accUsername').value.trim(), n=document.getElementById('accName').value.trim();
+  if(!u||!n){ alert('帳號與名稱為必填'); return; }
+  const data={username:u,password:document.getElementById('accPassword').value,name:n,group:document.getElementById('accGroup').value,
+  note:document.getElementById('accNote').value,enable:document.getElementById('accEnable').value,sites:editingIndex!==null?accounts[editingIndex].sites:[]};
+  if(editingIndex!==null) accounts[editingIndex]=data; else accounts.push(data);
+  closeModal(); render();
+}
+function editAccount(i){ editingIndex=i; const acc=accounts[i]; document.getElementById('modalTitle').textContent='編輯帳號';
+  ['accUsername','accPassword','accName','accGroup','accNote','accEnable'].forEach(id=>{document.getElementById(id).value=acc[id.replace('acc','').toLowerCase()]; document.getElementById(id).disabled=false;});
+  document.getElementById('confirmBtn').style.display='inline-block';
+  document.getElementById('modal').style.display='block';
+}
+function viewAccount(i){ const acc=accounts[i]; document.getElementById('modalTitle').textContent='瀏覽帳號';
+  ['accUsername','accPassword','accName','accGroup','accNote','accEnable'].forEach(id=>{document.getElementById(id).value=acc[id.replace('acc','').toLowerCase()]; document.getElementById(id).disabled=true;});
+  document.getElementById('confirmBtn').style.display='none'; document.getElementById('modal').style.display='block';
+}
+function delAccount(i){ if(confirm('確定刪除此帳號？')){ accounts.splice(i,1); render(); }}
+
+// ================= 案場關聯 =================
+function openSiteModal(i){ siteIndex=i; const acc=accounts[i]; document.getElementById('siteAcc').value=acc.username; document.getElementById('siteName').value=acc.name; renderSiteList(); document.getElementById('siteModal').style.display='block'; }
+function closeSiteModal(e){ if(e && e.target!==e.currentTarget) return; document.getElementById('siteModal').style.display='none'; }
+function addSite(){ const val=document.getElementById('siteSelect').value; if(!val) return; const acc=accounts[siteIndex]; if(!acc.sites.includes(val)) acc.sites.push(val); renderSiteList(); }
+function removeSite(name){ const acc=accounts[siteIndex]; acc.sites=acc.sites.filter(s=>s!==name); renderSiteList(); }
+function renderSiteList(){ const acc=accounts[siteIndex]; const container=document.getElementById('siteList'); if(acc.sites.length===0) container.innerHTML='<div class="empty">尚無關聯案場</div>'; else container.innerHTML=acc.sites.map(s=>`<div>${s}<span onclick="removeSite('${s}')">✕</span></div>`).join(''); }
+function saveSites(){ closeSiteModal(); render(); }
+
+// ================= 搜尋 =================
+function searchAccountFunc(){ const username=document.getElementById('searchAccount').value.trim(), name=document.getElementById('searchName').value.trim();
+  const filtered=accounts.filter(a=>(!username||a.username.includes(username))&&(!name||a.name.includes(name)));
+  const rowsContainer=document.getElementById('rowsContainer'); rowsContainer.innerHTML='';
+  if(filtered.length===0){ rowsContainer.innerHTML='<div class="empty">查無資料</div>'; } else {
+    filtered.forEach((acc,i)=>{ const row=document.createElement('div'); row.className='list-row';
+      row.innerHTML=`<div class="col-1">${i+1}</div><div class="col-2">${acc.username}</div><div class="col-3">${acc.name}</div>
+      <div class="col-4">${acc.group}</div><div class="col-5">${acc.enable}</div><div class="col-6"><button class="icon-btn" onclick="openSiteModal(${i})">案場關聯</button></div>
+      <div class="col-7"><button class="icon-btn" onclick="editAccount(${i})">編輯</button></div><div class="col-8"><button class="icon-btn" onclick="delAccount(${i})">刪除</button></div>
+      <div class="col-9"><button class="icon-btn" onclick="viewAccount(${i})">瀏覽</button></div>`; rowsContainer.appendChild(row); });
+  }
+  document.getElementById('countText').textContent=`共 ${filtered.length} 筆資料`;
+}
+
+// ================= TOP =================
+const topBtn=document.getElementById('topBtn'); window.addEventListener('scroll',()=>{ topBtn.style.display=window.scrollY>120?'block':'none'; });
+function scrollToTop(){ window.scrollTo({top:0,behavior:'smooth'}); }
+
+render();
+</script>
+
+</body>
+</html>

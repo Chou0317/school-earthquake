@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>即時地震監測系統 - 登入</title>
+<style>
+  body {
+    margin: 0;
+    font-family: "Noto Sans TC", sans-serif;
+    background-color: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+
+  .login-container {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    width: 360px;
+    text-align: center;
+  }
+
+  .login-container img.logo {
+    max-width: 120px;
+    margin-bottom: 20px;
+  }
+
+  .login-container h1 {
+    font-size: 22px;
+    margin-bottom: 30px;
+    color: #002b88;
+  }
+
+  .login-container label {
+    display: block;
+    text-align: left;
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: #333;
+  }
+
+  .login-container input {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+
+  .login-container button {
+    width: 100%;
+    padding: 10px;
+    background-color: #002b88;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .login-container button:hover {
+    background-color: #0039b0;
+  }
+
+  .info {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #555;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+  <div class="login-container">
+    <!-- 公司 Logo -->
+    <img class="logo" src="images/DPS_logo.jpg" alt="公司Logo">
+
+    <!-- 標題 -->
+    <h1>即時地震監測系統</h1>
+
+    <!-- 帳號輸入 -->
+    <label for="username">帳號 / Username</label>
+    <input type="text" id="username" placeholder="請輸入帳號">
+
+    <!-- 密碼輸入 -->
+    <label for="password">密碼 / Password</label>
+    <input type="password" id="password" placeholder="請輸入密碼">
+
+    <!-- 登入按鈕 -->
+    <button id="loginBtn">登入</button>
+
+    <!-- 維運單位 / 客服 -->
+    <div class="info">
+      維運單位：中保防災科技股份有限公司<br>
+      客服電話：02-7746-9918
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      // 直接跳轉到另一個前端頁面
+      window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>
+

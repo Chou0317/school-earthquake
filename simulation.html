@@ -20,27 +20,58 @@ html,body{height:100%; margin:0; background:var(--bg);}
 body{padding:24px; display:flex; justify-content:center;}
 
 /* 卡片 */
-.card{width:100%; max-width:980px; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; margin-top:20px;}
+.card{width:100%; max-width:980px; background:var(--card); border-radius:0; box-shadow:var(--shadow); overflow:hidden; margin-top:20px;}
 
 /* header */
 .header{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 20px; background:var(--primary); color:white;}
 .title{font-size:20px; font-weight:600;}
 
-/* 搜尋區 */
-.search-row { display:flex; align-items:center; gap:12px; padding:12px 20px; background:#f9fafb; border-radius:8px; margin:0 16px 12px 16px; flex-wrap:wrap; }
-.search-row .form-group{ display:flex; align-items:center; gap:6px; }
+/* 搜尋區 - 保留原本間距 */
+.search-row {
+  display: flex;
+  align-items: center;
+  gap:12px; /* 固定間距 */
+  padding:12px 20px;
+  background:#f9fafb;
+  border-radius:8px;
+  margin:0 16px 12px 16px;
+  flex-wrap:wrap;
+}
+.search-row .form-group{
+  display:flex;
+  align-items:center;
+  gap:6px; /* 保留原本欄位間距 */
+  flex: 0 0 auto; /* 不平均填滿 */
+}
 .search-row label{ font-size:15px; font-weight:500; color:var(--muted); white-space:nowrap; line-height:32px; }
-.search-row select, .search-row input[type="text"]{ height:32px; padding:4px 8px; border-radius:6px; border:1px solid #ccc; font-size:14px; background:#fff; -webkit-appearance:none; -moz-appearance:none; appearance:none; }
-.btn-search{ height:32px; padding:0 14px; border-radius:6px; background:var(--primary-light); color:#fff; border:none; cursor:pointer; font-weight:600; font-size:14px; display:flex; align-items:center; justify-content:center; }
+.search-row input[type="text"]{ height:28px; padding:2px 6px; border-radius:6px; border:1px solid #ccc; font-size:14px; }
+.btn-search{ height:28px; padding:0 14px; border-radius:6px; background:var(--primary-light); color:#fff; border:none; cursor:pointer; font-weight:600; font-size:14px; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
 
-/* 列表 */
+/* 統一下拉選單樣式 */
+.search-row select,
+.list-row select {
+    height:28px;
+    padding:2px 6px;
+    border-radius:6px;
+    border:1px solid #ccc;
+    font-size:14px;
+}
+
+/* 列表欄位平均分配 */
 .list{ width:100%; border-top:1px solid #eee; border-bottom:1px solid #eee; margin-top:0; }
-.list-head{ display:flex; gap:12px; padding:10px 8px; align-items:center; color:var(--muted); font-weight:700; background:#f9fafb; }
-.list-row{ display:flex; align-items:center; gap:12px; padding:12px 8px; border-bottom:1px solid #f2f2f2; }
-
-.col-1{ width:60px; flex-shrink:0; text-align:center; color:var(--muted); }
-.col-2,.col-3,.col-5,.col-6{ flex:1; min-width:120px; }
-.col-4{ width:120px; flex-shrink:0; text-align:center; }
+.list-head, .list-row {
+  display: flex;
+  align-items: center;
+  gap:12px;
+  padding:12px 8px;
+}
+.list-head div, .list-row div {
+  flex: 1 1 0; /* 平均分配 */
+  min-width:80px;
+  text-align: center;
+}
+.col-1 { flex: 0 0 60px; }    
+.col-6 { min-width:150px; }  
 
 /* 模擬按鈕 */
 .sim-btn{ padding:4px 8px; border-radius:6px; background:var(--primary-light); color:#fff; border:none; cursor:pointer; font-size:13px; font-weight:600; margin-left:4px; }
@@ -54,8 +85,7 @@ body{padding:24px; display:flex; justify-content:center;}
 
 /* 小螢幕響應 */
 @media (max-width:720px){
-  .list-head{ font-size:13px; }
-  .col-2,.col-3,.col-5,.col-6{ min-width:80px; }
+  .list-head div, .list-row div{ min-width:60px; }
   .search-row{ gap:8px; }
 }
 </style>
@@ -104,7 +134,7 @@ body{padding:24px; display:flex; justify-content:center;}
       <div class="col-2">ID</div>
       <div class="col-3">縣市</div>
       <div class="col-4">鄉鎮</div>
-      <div class="col-5">名稱</div>
+      <div class="col-5">案場名稱</div>
       <div class="col-6">模擬地震</div>
     </div>
     <div id="rowsContainer">
@@ -173,6 +203,7 @@ function render(list){
       <div class="col-5">${h.name}</div>
       <div class="col-6">
         <select id="sim_${h.id}">
+          <option value="-" selected>-</option>
           <option value="1">1</option>
           <option value="2">2</option>
           <option value="3">3</option>
@@ -205,6 +236,10 @@ function searchHosts(){
 // 模擬送出
 function sendSim(id){
   const sel=document.getElementById('sim_'+id);
+  if(sel.value==='-'){
+    alert(`請先選擇模擬地震強度`);
+    return;
+  }
   alert(`主機 ${id} 模擬地震：${sel.value}`);
 }
 
@@ -218,4 +253,3 @@ function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
 </script>
 </body>
 </html>
-

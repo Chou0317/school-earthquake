@@ -4,250 +4,249 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>最新地震資訊</title>
-
 <style>
-/* ========================= 根元素變數與字體 ========================= */
 :root{
-  --bg:#6c6c6c; /* 頁面背景灰色 */
-  --card:#ffffff; /* 卡片背景白色 */
-  --primary:#002b88; /* 標題背景藍色 */
-  --muted:#6b7280; /* 次要文字灰色 */
-  --shadow:0 6px 18px rgba(15,23,42,0.08); /* 卡片陰影 */
-  --radius:12px; /* 卡片圓角 */
+  --bg:#6c6c6c;
+  --card:#ffffff;
+  --primary:#002b88;
+  --muted:#6b7280;
+  --shadow:0 4px 12px rgba(0,0,0,.08);
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans TC','Microsoft JhengHei',sans-serif;
 }
 
-/* ========================= 全局樣式 ========================= */
-html, body{
-  height:100%;
-  margin:0;
-  background:var(--bg); /* 頁面背景 */
-}
+html,body{margin:0;background:var(--bg);}
+body{display:flex;justify-content:center;padding:24px;}
 
-body{
-  display:flex;
-  justify-content:center; /* 水平置中卡片 */
-  align-items:flex-start; /* 頂部對齊 */
-  padding:24px 0; /* 上下內距 */
-}
-
-/* ========================= 外層卡片 ========================= */
 .card{
-  background: var(--card); /* 卡片白色背景 */
-  border-radius: var(--radius); /* 卡片圓角 */
-  box-shadow: var(--shadow); /* 卡片陰影 */
-  overflow: hidden;
-  display:flex;
-  flex-direction:column; /* 垂直排列標題與內容 */
+  background:#fff;
+  box-shadow:var(--shadow);
+  width:100%;
+  max-width:1400px;
 }
 
-/* ========================= 標題區 ========================= */
 .header{
-  padding:16px 20px;
-  background:var(--primary); /* 藍色背景 */
+  padding:14px 20px;
+  background:var(--primary);
   color:#fff;
   font-size:20px;
   font-weight:600;
-  text-align:left; /* 標題靠左 */
 }
 
-/* ========================= 主要內容區（地圖 + 右側資訊） ========================= */
 .main{
-  display:flex; /* 左右排列 */
-  gap:20px; /* 左右間距 */
-  align-items:flex-start;
-  justify-content:flex-start;
+  display:grid;
+  grid-template-columns:420px 1fr;
+  gap:16px;
+  padding:16px;
 }
 
-/* ========================= 地震震央地圖 ========================= */
 .map{
-  width:420px; /* 寬度固定 */
-  height:650px; /* 高度固定 */
-  background:#fff; /* 白底 */
-  border-radius:8px;
+  height:650px;
+  background:#fff;
+  box-shadow:var(--shadow);
   display:flex;
   align-items:center;
   justify-content:center;
   color:var(--muted);
-  font-size:14px;
-  box-shadow:var(--shadow);
 }
 
-/* ========================= 右側資訊區（grid 三欄） ========================= */
-.right-panel{
+/* ===== 右側上方三區塊 ===== */
+.top-right{
   display:grid;
-  grid-template-columns:1fr 2fr 1fr; /* 左小、中大、右小三欄 */
+  grid-template-columns:120px 120px 1fr;
   gap:12px;
-  min-width:600px; /* 右側最小寬度 */
+  height:180px;
 }
 
-/* ========================= 各資訊卡片 ========================= */
-.block{
-  background:#fff; /* 白底 */
-  border-radius:8px;
-  padding:12px;
+/* ===== 震度 ===== */
+.intensity{
+  background:#fff;
+  box-shadow:var(--shadow);
+  padding:10px;
+}
+
+.intensity h4{
+  margin:0 0 6px;
+  font-size:14px;
+}
+
+.intensity-list{
   display:flex;
   flex-direction:column;
-  align-items:center; /* 文字置中 */
-  justify-content:center;
-  box-shadow:var(--shadow);
-  min-height:90px; /* 最小高度 */
+  gap:4px;
+  font-size:13px;
 }
 
-/* 卡片標題 */
-.block-label{
-  font-size:14px;
-  color:var(--muted);
-  margin-bottom:6px;
-  font-weight:600;
-  text-align:center;
+.dot{
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  display:inline-block;
+  margin-right:6px;
 }
 
-/* 卡片數值 */
-.block-value{
-  font-size:20px;
-  font-weight:700;
-  text-align:center;
-}
-
-/* 震度列（多個 badge） */
-.intensity-row{
-  display:flex;
-  gap:6px; /* badge 間距 */
-  overflow-x:auto; /* 避免溢出，用滑動呈現 */
-  white-space:nowrap; /* 防止換行 */
-}
-
-/* 單個震度 badge */
-.badge{
-  width:46px;
-  height:46px;
-  border-radius:6px;
-  color:#fff;
-  font-weight:700;
-  font-size:18px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex-shrink:0;
-}
-
-/* ========================= 區域列表 ========================= */
-.area{
-  margin-top:8px;
-  overflow:auto; /* 可滾動 */
-  max-height:400px;
-  padding:12px;
-  grid-column:1/4; /* 占滿三欄 */
+/* ===== 芮氏規模 ===== */
+.magnitude{
   background:#fff;
-  border-radius:8px;
   box-shadow:var(--shadow);
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
 }
 
-/* 區域標題 */
+.magnitude span{
+  font-size:14px;
+  color:#555;
+}
+
+.magnitude strong{
+  font-size:60px;
+  font-weight:800;
+  color:#ef4444;
+}
+
+/* ===== 發生時刻 + 震央 ===== */
+.info-stack{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  height:100%;
+}
+
+.info-box{
+  background:#fff;
+  box-shadow:var(--shadow);
+  padding:12px 16px;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.info-box h5{
+  margin:0 0 4px;
+  font-size:16px;
+  color:#555;
+}
+
+.info-box p{
+  margin:0;
+  font-size:18px;
+  font-weight:600;
+  line-height:1.6;
+}
+
+/* ===== 右側下方影響縣市 ===== */
+.area{
+  background:#fff;
+  box-shadow:var(--shadow);
+  padding:12px;
+  max-height:380px;
+  overflow:auto;
+  margin-top:64px; /* 增加向下距離 */
+}
+
 .area-title{
   font-weight:700;
-  margin:12px 0 6px 0;
+  margin:12px 0 6px;
 }
 
-/* 各縣市區塊 */
-.county{
-  border:1px solid #e5e7eb;
-  border-radius:8px;
-  margin-bottom:8px;
-}
-
-/* summary 樣式 */
 .county summary{
-  padding:8px 12px;
-  font-weight:600;
   cursor:pointer;
+  font-weight:600;
 }
 
-/* 展開內容樣式 */
-.county div{
-  padding:6px 28px;
+.districts{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px 14px;
+  padding:6px 18px;
   font-size:14px;
-  color:#374151;
 }
 
-/* ========================= 響應式 ========================= */
+/* ===== RWD ===== */
 @media(max-width:900px){
-  .main{flex-direction:column;} /* 手機改垂直排列 */
-  .map{width:100%;height:400px;} /* 地圖寬度自適應 */
-  .right-panel{grid-template-columns:1fr;} /* 右側資訊改單欄 */
-  .area{max-height:300px;}
+  .main{grid-template-columns:1fr;}
+  .top-right{grid-template-columns:1fr; height:auto;}
+  .area{width:100%;}
 }
 </style>
 </head>
-
 <body>
+
 <div class="card">
-  <!-- 標題 -->
   <div class="header">最新地震資訊</div>
 
   <div class="main">
-    <!-- 左側地圖 -->
+
+    <!-- 左側震央地圖 -->
     <div class="map">震央地圖（示意）</div>
 
-    <!-- 右側資訊 -->
-    <div class="right-panel">
-      <!-- 震度（占滿三欄） -->
-      <div class="block" style="grid-column:1/4;">
-        <div class="block-label">震度</div>
-        <div class="intensity-row">
-          <div class="badge" style="background:#22c55e">1</div>
-          <div class="badge" style="background:#84cc16">2</div>
-          <div class="badge" style="background:#facc15">3</div>
-          <div class="badge" style="background:#fb923c">4</div>
-          <div class="badge" style="background:#f97316">5弱</div>
-          <div class="badge" style="background:#b45309">5強</div>
-          <div class="badge" style="background:#7c2d12">6弱</div>
-          <div class="badge" style="background:#9d174d">6強</div>
-          <div class="badge" style="background:#6d28d9">7</div>
+    <!-- 右側 -->
+    <div class="right">
+
+      <!-- 上方三區塊 -->
+      <div class="top-right">
+        <div class="intensity">
+          <h4>震度</h4>
+          <div class="intensity-list">
+            <div><span class="dot" style="background:#b61eeb"></span>7</div>
+            <div><span class="dot" style="background:#9a4c86"></span>6強</div>
+            <div><span class="dot" style="background:#9a4644"></span>6弱</div>
+            <div><span class="dot" style="background:#c43c3c"></span>5強</div>
+            <div><span class="dot" style="background:#fe5231"></span>5弱</div>
+            <div><span class="dot" style="background:#fe842e"></span>4</div>
+            <div><span class="dot" style="background:#fffe2f"></span>3</div>
+            <div><span class="dot" style="background:#33ff34"></span>2</div>
+            <div><span class="dot" style="background:#e0ffe0"></span>1</div>
+          </div>
+        </div>
+
+        <div class="magnitude">
+          <span>芮氏規模</span>
+          <strong>5.1</strong>
+        </div>
+
+        <div class="info-stack">
+          <div class="info-box">
+            <h5>發生時刻</h5>
+            <p>2025 年 12 月 18 日　19 時 32 分 50 秒</p>
+          </div>
+          <div class="info-box">
+            <h5>震央</h5>
+            <p>
+              北緯 24.1 度、東經 121.76 度<br>
+              震源深度：18.3 公里（臺灣東部海域）
+            </p>
+          </div>
         </div>
       </div>
 
-      <!-- 同一行：芮氏規模 / 發生時刻 / 震源深度 -->
-      <div class="block">
-        <div class="block-label">芮氏規模</div>
-        <div class="block-value" style="color:#9d174d">6.3</div>
-      </div>
-
-      <div class="block">
-        <div class="block-label">發生時刻</div>
-        <div class="block-value">2025-12-19 14:20:15</div>
-      </div>
-
-      <div class="block">
-        <div class="block-label">震源深度</div>
-        <div class="block-value">15 km</div>
-      </div>
-
-      <!-- 震央（占滿三欄） -->
-      <div class="block" style="grid-column:1/4;">
-        <div class="block-label">震央</div>
-        <div class="block-value">花蓮縣近海</div>
-      </div>
-
-      <!-- 區域列表 -->
+      <!-- 下方獨立影響縣市區塊 -->
       <div class="area">
         <div class="area-title">北部地區</div>
-        <details class="county"><summary>台北市地區最大震度 4 級</summary>
-          <div>內湖區 3 級</div>
-          <div>大安區 4 級</div>
+        <details open>
+          <summary>台北市 最大震度 4 級</summary>
+          <div class="districts">
+            <span>內湖區 3 級</span>
+            <span>大安區 4 級</span>
+            <span>士林區 3 級</span>
+          </div>
         </details>
-        <details class="county"><summary>新北市地區最大震度 3 級</summary>
-          <div>板橋區 3 級</div>
-        </details>
+
         <div class="area-title">東部地區</div>
-        <details class="county"><summary>花蓮縣地區最大震度 6 強</summary>
-          <div>花蓮市 6 強</div>
-          <div>吉安鄉 5 強</div>
+        <details open>
+          <summary>花蓮縣 最大震度 6 強</summary>
+          <div class="districts">
+            <span>花蓮市 6 強</span>
+            <span>吉安鄉 5 強</span>
+          </div>
         </details>
       </div>
+
     </div>
   </div>
 </div>
+
 </body>
 </html>

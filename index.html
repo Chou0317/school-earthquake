@@ -131,15 +131,27 @@
       <li>
         <a href="#">2U主機管理</a>
         <ul>
-          <li><a href="#">2U主機管理</a></li>
+          <li><a href="#" onclick="loadPage('2U setting.html')">2U主機設定</a></li>
+          <li><a href="#" onclick="loadPage('group.html')">群組設定</a></li>
+          <li><a href="#" onclick="loadPage('CWA.html')">氣象署連線設定</a></li>
+          <li><a href="#" onclick="loadPage('threshold.html')">地震發報設定</a></li>
+        </ul>
+      </li>
+
+      <li>
+        <a href="#">狀態管理</a>
+        <ul>
           <li><a href="#" onclick="loadPage('monitor.html')">即時監控</a></li>
+          <li><a href="#" onclick="loadPage('state.html')">管理紀錄</a></li>
+        </ul>
+      </li>
+
+      <li>
+        <a href="#">模擬演練</a>
+        <ul>
           <li><a href="#" onclick="loadPage('simulation.html')">地震模擬</a></li>
           <li><a href="#" onclick="loadPage('group simulation.html')">地震模擬(群組)</a></li>
           <li><a href="#" onclick="loadPage('simulation schedule.html')">地震模擬排程</a></li>
-          <li><a href="#" onclick="loadPage('group.html')">群組管理</a></li>
-          <li><a href="#" onclick="loadPage('CWA.html')">氣象署連線設定</a></li>
-          <li><a href="#" onclick="loadPage('threshold.html')">地震發報設定</a></li>
-          <li><a href="#" onclick="loadPage('state.html')">管理紀錄</a></li>
         </ul>
       </li>
 
@@ -153,11 +165,11 @@
       <li>
         <a href="#">後台設定</a>
         <ul>
-          <li><a href="#" onclick="loadPage('permissions.html')">權限管理</a></li>
-          <li><a href="#">帳號管理</a></li>
+          <li><a href="#" onclick="loadPage('permissions.html')">群組管理</a></li>
+          <li><a href="#" onclick="loadPage('account.html')">帳號管理</a></li>
           <li><a href="#" onclick="loadPage('password.html')">變更密碼</a></li>
           <li><a href="#" onclick="loadPage('backend.html')">後台紀錄</a></li>
-          <li><a href="#">登出</a></li>
+          <li><a href="login.html">登出</a></li>
         </ul>
       </li>
     </ul>

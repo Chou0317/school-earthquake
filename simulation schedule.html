@@ -32,7 +32,7 @@ body{
     width:100%; 
     max-width:980px; 
     background:var(--card); 
-    border-radius:var(--radius); 
+    border-radius:0; 
     box-shadow:var(--shadow); 
     overflow:hidden; 
     margin-top:20px; 
@@ -306,7 +306,7 @@ body{
   <div class="list" aria-live="polite">
     <div class="list-head">
       <div class="col-1">序號</div>
-      <div class="col-2">名稱</div>
+      <div class="col-2">群組名稱</div>
       <div class="col-3">演練主題</div>
       <div class="col-4">演練時間</div>
       <div class="col-5">演練震度</div>
@@ -327,7 +327,7 @@ body{
         <input type="text" id="newTheme" placeholder="輸入主題">
       </div>
       <div class="form-group">
-        <label for="newLocation">地點</label>
+        <label for="newLocation">群組</label>
         <select id="newLocation"></select>
       </div>
       <div class="form-group">
@@ -340,8 +340,8 @@ body{
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-search" onclick="saveSchedule()">儲存</button>
-      <button class="btn-close" onclick="closeModal()">關閉</button>
+        <button class="btn-close" onclick="closeModal()">取消</button>
+        <button class="btn-search" onclick="saveSchedule()">確認</button>
     </div>
   </div>
 </div>

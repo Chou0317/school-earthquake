@@ -21,7 +21,7 @@
 html,body{ height:100%; margin:0; background:var(--bg); }
 body{ padding:24px; display:flex; justify-content:center; }
 
-.card{ width:100%; max-width:1100px; background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+.card{ width:100%; max-width:1200px; background:var(--card); border-radius:0; box-shadow:var(--shadow); overflow:hidden; }
 
 .header{ padding:16px 20px; background:var(--primary); color:#fff; }
 .title{ font-size:20px; font-weight:600; }
@@ -44,8 +44,8 @@ body{ padding:24px; display:flex; justify-content:center; }
 .col-1{ width:60px; text-align:center; }
 .col-2{ width:140px; }
 .col-3,.col-4,.col-5{ flex:1; min-width:120px; }
-.col-6{ width:180px; }
-.col-7{ width:100px; text-align:center; }
+.col-6,.col-7{ width:100px; text-align:center; }
+.col-8{ width:180px; text-align:center; }
 
 .empty{ padding:28px; text-align:center; color:var(--muted); }
 
@@ -83,6 +83,15 @@ body{ padding:24px; display:flex; justify-content:center; }
     </div>
 
     <div class="form-group">
+      <label>警報類型</label>
+      <select id="typeSelect">
+        <option value="-">-</option>
+        <option>模擬</option>
+        <option>真實</option>
+      </select>
+    </div>
+
+    <div class="form-group">
       <label>時間區間</label>
       <input type="date" id="startDate">
       <span>~</span>
@@ -96,7 +105,7 @@ body{ padding:24px; display:flex; justify-content:center; }
         <input id="idInput" placeholder="主機ID">
       </div>
       <div class="form-group">
-        <label>名稱</label>
+        <label>案場名稱</label>
         <input id="nameInput" placeholder="主機名稱">
       </div>
       <button class="btn-search" onclick="search()">搜尋</button>
@@ -112,9 +121,10 @@ body{ padding:24px; display:flex; justify-content:center; }
       <div class="col-2">ID</div>
       <div class="col-3">縣市</div>
       <div class="col-4">鄉鎮</div>
-      <div class="col-5">名稱</div>
-      <div class="col-6">警報時間</div>
-      <div class="col-7">震度</div>
+      <div class="col-5">案場名稱</div>
+      <div class="col-6">震度</div>
+      <div class="col-7">警報類型</div>
+      <div class="col-8">警報時間</div>
     </div>
     <div id="rows"></div>
   </div>
@@ -126,9 +136,9 @@ body{ padding:24px; display:flex; justify-content:center; }
 <script>
 // 範例資料
 const data = [
-  {id:'DIO001',county:'台北市',town:'內湖區',name:'主機A',time:'2025-12-21 11:30:15',intensity:'5弱'},
-  {id:'DIO002',county:'新北市',town:'板橋區',name:'主機B',time:'2025-12-20 08:15:42',intensity:'4級'},
-  {id:'DIO003',county:'高雄市',town:'左營區',name:'主機C',time:'2025-12-18 22:45:10',intensity:'6弱'}
+  {id:'DIO001',county:'台北市',town:'內湖區',name:'主機A',intensity:'5弱', type:'模擬', time:'2025-12-21 11:30:15'},
+  {id:'DIO002',county:'新北市',town:'板橋區',name:'主機B',intensity:'4級', type:'真實', time:'2025-12-20 08:15:42'},
+  {id:'DIO003',county:'高雄市',town:'左營區',name:'主機C',intensity:'6弱', type:'模擬', time:'2025-12-18 22:45:10'}
 ];
 
 // 縣市->鄉鎮對應
@@ -167,8 +177,9 @@ function render(list){
         <div class="col-3">${r.county}</div>
         <div class="col-4">${r.town}</div>
         <div class="col-5">${r.name}</div>
-        <div class="col-6">${r.time}</div>
-        <div class="col-7">${r.intensity}</div>
+        <div class="col-6">${r.intensity}</div>
+        <div class="col-7">${r.type}</div>
+        <div class="col-8">${r.time}</div>
       </div>`;
   });
 }
@@ -180,6 +191,7 @@ function search(){
     if(countySelect.value!='-' && r.county!=countySelect.value) return false;
     if(townSelect.value!='-' && r.town!=townSelect.value) return false;
     if(intensitySelect.value!='-' && r.intensity!=intensitySelect.value) return false;
+    if(typeSelect.value!='-' && r.type!=typeSelect.value) return false;
     if(idInput.value && !r.id.includes(idInput.value)) return false;
     if(nameInput.value && !r.name.includes(nameInput.value)) return false;
     if(startDate.value && rDate<startDate.value) return false;
@@ -198,5 +210,3 @@ window.onscroll=()=>topBtn.style.display=scrollY>120?'flex':'none';
 </script>
 </body>
 </html>
-
-

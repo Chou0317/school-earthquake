@@ -34,7 +34,7 @@ body{
   width:100%;
   max-width:980px;
   background:var(--card);
-  border-radius:var(--radius);
+  border-radius:0;
   box-shadow:var(--shadow);
   overflow:hidden;
 }
@@ -175,6 +175,16 @@ select,input{
 
 .btn-primary{background:var(--primary-light);color:#fff;}
 .btn-cancel{background:#e5e7eb;}
+.btn-close{
+    padding:8px 12px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    background:#ffffff;
+    color:#374151;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+}
 
 /* ================= TOP BTN ================= */
 #topBtn{
@@ -213,7 +223,7 @@ select,input{
       <input id="idInput" />
     </div>
     <div class="form-group">
-      <label>名稱</label>
+      <label>案場名稱</label>
       <input id="nameInput" />
     </div>
     <button class="btn-search" onclick="search()">搜尋</button>
@@ -226,7 +236,7 @@ select,input{
     <div class="list-head">
       <div class="col-1">序號</div>
       <div class="col-2">ID</div>
-      <div class="col-3">名稱</div>
+      <div class="col-3">案場名稱</div>
       <div class="col-4">縣市</div>
       <div class="col-5">鄉鎮</div>
       <div class="col-6">氣象署連線</div>
@@ -241,13 +251,13 @@ select,input{
     <div class="modal-header">氣象署連線設定</div>
     <div class="modal-body">
       <div class="form-group"><label>ID</label><input id="mId" disabled></div>
-      <div class="form-group"><label>名稱</label><input id="mName" disabled></div>
+      <div class="form-group"><label>案場名稱</label><input id="mName" disabled></div>
       <div class="form-group"><label>氣象署帳號</label><input></div>
       <div class="form-group"><label>氣象署密碼</label><input type="password"></div>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-cancel" onclick="closeModal()">取消</button>
-      <button class="btn btn-primary">送出</button>
+      <button class="btn btn-close" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary">確認</button>
     </div>
   </div>
 </div>

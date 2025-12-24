@@ -6,7 +6,6 @@
 <title>群組管理</title>
 
 <style>
-/* ============ 全域樣式區：定義顏色、圓角、陰影及字型等變數，方便統一調整樣式 ============ */
 :root{
   --bg:#6c6c6c;
   --card:#ffffff;
@@ -16,169 +15,72 @@
   --muted:#6b7280;
   --shadow:0 6px 18px rgba(15,23,42,0.08);
   --radius:12px;
-  /* 基礎字體 */
   font-family:-apple-system, BlinkMacSystemFont,'Segoe UI', Roboto,'Noto Sans TC','Microsoft JhengHei',sans-serif;
 }
 
-html,body{
-    height:100%; 
-    margin:0; 
-    background:var(--bg);
+html,body{ height:100%; margin:0; background:var(--bg); }
+body{ padding:24px; display:flex; justify-content:center; }
+
+.card{ width:100%; max-width:920px; background:var(--card); border-radius:0; box-shadow:var(--shadow); overflow:hidden; margin-top:20px; }
+
+.header{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 20px; background:var(--primary); color:white; }
+.title{ font-size:20px; font-weight:600; }
+.actions{ display:flex; gap:8px; align-items:center; }
+
+.btn{ border:0; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px; }
+.btn-primary{ background:var(--primary-light); color:white; }
+.btn-danger{ background:var(--danger); color:white; }
+.btn-close{
+    padding:8px 12px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    background:#ffffff;
+    color:#374151;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
 }
 
-/* 外層置中卡片 */
-body{ 
-    padding:24px; 
-    display:flex; 
-    justify-content:center; 
-}
+.list{ width:100%; border-top:1px solid #eee; border-bottom:1px solid #eee; margin-top:0; }
+.list-head{ display:flex; gap:12px; padding:10px 8px; align-items:center; color:var(--muted); font-weight:700; background:#f9fafb; }
+.list-row{ display:flex; align-items:center; gap:12px; padding:12px 8px; border-bottom:1px solid #f2f2f2; }
 
-.card{ 
-    width:100%; 
-    max-width:920px; 
-    background:var(--card); 
-    border-radius:var(--radius); 
-    box-shadow:var(--shadow); 
-    overflow:hidden; 
-    margin-top:20px; 
-}
+.col-1{ width:60px; flex-shrink:0; text-align:center; color:var(--muted); }
+.col-2,.col-3{ flex:1; min-width:120px; }
+.col-4,.col-5,.col-6{ width:90px; flex-shrink:0; text-align:center; }
 
-/* header */
-.header{ 
-    display:flex; 
-    align-items:center; 
-    justify-content:space-between; 
-    gap:12px; 
-    padding:16px 20px; 
-    background:var(--primary); 
-    color:white; 
-}
+.icon-btn{ padding:6px 8px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); background:transparent; cursor:pointer; font-weight:600; }
 
-.title{ 
-    font-size:20px; 
-    font-weight:600; 
-}
+.empty{ padding:28px; text-align:center; color:var(--muted); }
 
-.actions{ 
-    display:flex; 
-    gap:8px; 
-    align-items:center; 
-}
-
-/* 通用按鈕 */
-.btn{ 
-    border:0; 
-    padding:8px 12px; 
-    border-radius:8px; 
-    cursor:pointer; 
-    font-weight:600; 
-    font-size:14px; 
-}
-
-.btn-primary{ 
-    background:var(--primary-light); 
-    color:white; 
-}
-
-.btn-danger{ 
-    background:var(--danger); 
-    color:white; 
-}
-
-/* 列表 */
-.list{ 
-    width:100%; 
-    border-top:1px solid #eee; 
-    border-bottom:1px solid #eee; 
-    margin-top:0; 
-}
-
-.list-head{ 
-    display:flex; 
-    gap:12px; 
-    padding:10px 8px; 
-    align-items:center; 
-    color:var(--muted); 
-    font-weight:700; 
-    background:#f9fafb; 
-}
-
-.list-row{ 
-    display:flex; 
-    align-items:center; 
-    gap:12px; 
-    padding:12px 8px; 
-    border-bottom:1px solid #f2f2f2; 
-}
-
-.col-1{ 
-    width:60px; 
-    flex-shrink:0; 
-    text-align:center; 
-    color:var(--muted); 
-}
-
-.col-2,.col-3{ 
-    flex:1; 
-    min-width:120px; 
-}
-
-.col-4,.col-5,.col-6{ 
-    width:90px; 
-    flex-shrink:0; 
-    text-align:center; 
-}
-
-.icon-btn{ 
-    padding:6px 8px; 
-    border-radius:8px; 
-    border:1px solid rgba(0,0,0,0.06); 
-    background:transparent; 
-    cursor:pointer; 
-    font-weight:600; 
-}
-
-.empty{ 
-    padding:28px; 
-    text-align:center; 
-    color:var(--muted); 
-}
-
-/* ============ 搜尋區 ============ */
 .search-row {
   display: flex;
-  align-items: center;     /* 保證整行元素垂直置中（同一基線） */
-  gap: 20px;               /* 每組之間的間距（可調） */
+  align-items: center;
+  gap: 20px;
   padding: 12px 20px;
   background: #f9fafb;
   border-radius: 8px;
   margin: 0 16px 12px 16px;
-  /* 不強制換行（若需要 RWD 再改成 wrap） */
   flex-wrap: nowrap;
 }
 
-/* 單一 Label + Input 的組合，靠得很近 */
 .search-row .form-group{
   display: flex;
   align-items: center;
-  gap: 4px;                /* Label 與 input 距離極小 */
+  gap: 4px;
 }
 
-/* Label 設為自動寬度、line-height 對齊 input 高度 */
 .search-row .form-group label{
   font-size: 15px;
   font-weight: 500;
   color: var(--muted);
   white-space: nowrap;
-  /* IMPORTANT: 與 input 同高度的 line-height，避免 baseline 跑掉 */
   line-height: 32px;
-  padding-right: 0;        /* 確保沒有意外右側空白 */
 }
 
-/* input 高度固定、padding 小，讓整體看起來整齊緊湊 */
 .search-row .form-group input[type="text"]{
-  width: 160px;            /* 若要更窄/更寬，調整這裡 */
-  height: 32px;            /* 高度與 button 一致 */
+  width: 160px;
+  height: 32px;
   padding: 4px 8px;
   border-radius: 6px;
   border: 1px solid #ccc;
@@ -186,7 +88,6 @@ body{
   box-sizing: border-box;
 }
 
-/* 搜尋按鈕（與 input 同高） */
 .btn-search{
   height: 32px;
   padding: 0 14px;
@@ -202,131 +103,30 @@ body{
   justify-content: center;
 }
 
-/* 手機的 RWD：若畫面不足，改成換行（同時把間距收緊） */
 @media (max-width:720px){
   .search-row{ flex-wrap:wrap; gap:12px; }
   .search-row .form-group input[type="text"]{ width:120px; }
 }
 
-/* ============ Modal ============ */
-.modal-backdrop{ 
-    position:fixed; 
-    inset:0; 
-    background:rgba(2,6,23,0.45); 
-    display:flex; align-items:center; 
-    justify-content:center; 
-    z-index:100; 
-}
+.modal-backdrop{ position:fixed; inset:0; background:rgba(2,6,23,0.45); display:flex; align-items:center; justify-content:center; z-index:100; }
+.modal{ background:var(--card); border-radius:var(--radius); padding:0; max-width:560px; width:92%; box-shadow:var(--shadow); overflow:hidden; }
+.modal-header{ padding:16px 20px; background:var(--primary); color:white; font-size:18px; font-weight:600; }
+.modal-body{ padding:18px; }
 
-.modal{ 
-    background:var(--card); 
-    border-radius:var(--radius); 
-    padding:0; 
-    max-width:560px; 
-    width:92%; 
-    box-shadow:var(--shadow); 
-    overflow:hidden; 
-}
+.form-row{ display:flex; align-items:center; gap:8px; margin-bottom:12px; justify-content:flex-start; }
+.form-row label{ width:90px; font-size:16px; color:var(--muted); text-align:left; }
+.form-row input[type="text"], .form-row select{ flex:1; padding:6px 8px; border-radius:6px; border:1px solid #ccc; font-size:14px; }
+.form-row input[type="text"]:focus, .form-row select:focus{ border-color:var(--primary-light); box-shadow:0 0 4px rgba(59,130,246,0.4); }
 
-.modal-header{ 
-    padding:16px 20px; 
-    background:var(--primary); 
-    color:white; 
-    font-size:18px; 
-    font-weight:600; 
-}
+.modal-footer{ display:flex; gap:8px; justify-content:flex-end; padding:12px 18px; background:#f9fafb; }
 
-.modal-body{ 
-    padding:18px; 
-}
+.added-sites{ border-top:1px solid #eee; margin-top:6px; padding-top:6px; }
+.site-list{ display:flex; flex-direction:column; gap:4px; }
+.site-item{ display:flex; align-items:center; justify-content:space-between; background:#f1f5f9; padding:4px 8px; border-radius:4px; }
+.site-item button{ border:none; background:none; cursor:pointer; font-weight:bold; color:var(--danger); }
 
-.form-row{ 
-    display:flex; 
-    align-items:center; 
-    gap:8px; 
-    margin-bottom:12px; 
-    justify-content:flex-start; 
-}
-
-.form-row label{ 
-    width:70px; 
-    font-size:16px; 
-    color:var(--muted); 
-    text-align:left; 
-}
-
-.form-row input[type="text"], .form-row select{ 
-    flex:1; padding:6px 8px; 
-    border-radius:6px; 
-    border:1px solid #ccc; 
-    font-size:14px; 
-}
-
-.form-row input[type="text"]:focus, .form-row select:focus{ 
-    border-color:var(--primary-light); 
-    box-shadow:0 0 4px rgba(59,130,246,0.4); 
-}
-
-.modal-footer{ 
-    display:flex; 
-    gap:8px; 
-    justify-content:flex-end;
-    padding:12px 18px; 
-    background:#f9fafb; 
-}
-
-/* 已加入案場 */
-.added-sites{ 
-    border-top:1px solid #eee; 
-    margin-top:6px; 
-    padding-top:6px; 
-}
-
-.site-list{ 
-    display:flex; 
-    flex-direction:column; 
-    gap:4px; 
-}
-
-.site-item{ 
-    display:flex; 
-    align-items:center; 
-    justify-content:space-between; 
-    background:#f1f5f9; 
-    padding:4px 8px; 
-    border-radius:4px; 
-}
-
-.site-item button{ 
-    border:none; 
-    background:none; 
-    cursor:pointer; 
-    font-weight:bold; 
-    color:var(--danger); 
-}
-
-/* TOP 按鈕 */
-#topBtn{ 
-    position:fixed; 
-    right:20px; 
-    bottom:20px; 
-    width:40px; 
-    height:40px; 
-    background:var(--primary-light); 
-    color:white; 
-    border:none; 
-    border-radius:6px; 
-    display:none; 
-    align-items:center; 
-    justify-content:center; 
-    cursor:pointer; 
-    z-index:200; 
-}
-
-#topBtn:hover{ 
-    background:#0056b3; 
-}
-
+#topBtn{ position:fixed; right:20px; bottom:20px; width:40px; height:40px; background:var(--primary-light); color:white; border:none; border-radius:6px; display:none; align-items:center; justify-content:center; cursor:pointer; z-index:200; }
+#topBtn:hover{ background:#0056b3; }
 </style>
 </head>
 <body>
@@ -335,39 +135,30 @@ body{
   <div class="header">
     <div class="title">群組管理</div>
     <div class="actions">
-      <!-- 新增群組按鈕 -->
       <button id="addBtn" class="btn btn-primary" onclick="openModal()">＋ 新增群組</button>
     </div>
   </div>
 
-  <!-- ================= 搜尋區 ================= -->
+  <!-- 搜尋區 -->
   <div class="search-row" role="search" aria-label="搜尋群組">
     <div class="form-group">
-      <label for="searchId">ID</label>
-      <input id="searchId" type="text" placeholder="輸入ID" />
+      <label for="searchName">群組名稱</label>
+      <input id="searchName" type="text" placeholder="輸入群組名稱" />
     </div>
-
-    <div class="form-group">
-      <label for="searchName">名稱</label>
-      <input id="searchName" type="text" placeholder="輸入名稱" />
-    </div>
-
     <button class="btn-search" onclick="searchGroup()">搜尋</button>
   </div>
-  <!-- ================= /搜尋區 ================= -->
 
-  <!-- 資料筆數（可選） -->
   <div id="countText" style="padding:8px 20px;color:var(--muted)">共 0 筆資料</div>
 
   <!-- 列表 -->
   <div class="list" aria-live="polite">
     <div class="list-head">
       <div class="col-1">序號</div>
-      <div class="col-2">ID</div>
-      <div class="col-3">名稱</div>
+      <div class="col-2">群組名稱</div>
+      <div class="col-3">備註</div>
       <div class="col-4">編輯</div>
       <div class="col-5">刪除</div>
-      <div class="col-6">明細</div>
+      <div class="col-6">瀏覽</div>
     </div>
     <div id="rowsContainer">
       <div class="empty">目前沒有群組資料</div>
@@ -375,19 +166,15 @@ body{
   </div>
 </div>
 
-<!-- ============ Modal（新增/編輯/明細共用） ============ -->
+<!-- Modal -->
 <div id="modal" style="display:none">
   <div class="modal-backdrop" id="backdrop">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal-header" id="modalTitle">新增群組</div>
       <div class="modal-body">
         <div class="form-row">
-          <label for="inputId">群組ID</label>
-          <input id="inputId" type="text" placeholder="輸入群組ID" />
-        </div>
-        <div class="form-row">
-          <label for="inputName">名稱</label>
-          <input id="inputName" type="text" placeholder="輸入名稱" />
+          <label for="inputName">群組名稱</label>
+          <input id="inputName" type="text" placeholder="輸入群組名稱" />
         </div>
         <div class="form-row">
           <label for="inputRemark">備註</label>
@@ -404,14 +191,13 @@ body{
           <button class="btn btn-primary" onclick="addSite()">加入群組</button>
         </div>
 
-        <!-- 已加入案場列表 -->
         <div class="added-sites">
           <div class="site-list" id="addedSites"></div>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button class="btn btn-primary" id="cancelBtn">取消</button>
+        <button class="btn-close" id="cancelBtn">取消</button>
         <button class="btn btn-primary" id="saveBtn">確認</button>
       </div>
     </div>
@@ -421,7 +207,6 @@ body{
 <button id="topBtn" onclick="scrollToTop()">TOP</button>
 
 <script>
-/* ========= 簡單資料與 DOM 取用 ========= */
 let groups = [];
 let editingId = null;
 
@@ -429,7 +214,6 @@ const rowsContainer = document.getElementById('rowsContainer');
 const countText = document.getElementById('countText');
 const modal = document.getElementById('modal');
 const backdrop = document.getElementById('backdrop');
-const inputId = document.getElementById('inputId');
 const inputName = document.getElementById('inputName');
 const inputRemark = document.getElementById('inputRemark');
 const siteSelect = document.getElementById('siteSelect');
@@ -438,7 +222,6 @@ const addedSitesDiv = document.getElementById('addedSites');
 const cancelBtn = document.getElementById('cancelBtn');
 const saveBtn = document.getElementById('saveBtn');
 
-/* ======= 渲染列表（簡單實作） ======= */
 function render(){
   rowsContainer.innerHTML = '';
   if(groups.length === 0){
@@ -451,43 +234,36 @@ function render(){
     const row = document.createElement('div'); row.className = 'list-row';
     row.innerHTML = `
       <div class="col-1">${idx+1}</div>
-      <div class="col-2">${escapeHtml(g.id)}</div>
-      <div class="col-3">${escapeHtml(g.name)}</div>
-      <div class="col-4"><button class="icon-btn" onclick="openEdit('${g.id}')">編輯</button></div>
-      <div class="col-5"><button class="icon-btn" onclick="deleteGroup('${g.id}')">刪除</button></div>
-      <div class="col-6"><button class="icon-btn" onclick="viewDetail('${g.id}')">明細</button></div>
+      <div class="col-2">${escapeHtml(g.name)}</div>
+      <div class="col-3">${escapeHtml(g.remark || '')}</div>
+      <div class="col-4"><button class="icon-btn" onclick="openEdit(${idx})">編輯</button></div>
+      <div class="col-5"><button class="icon-btn" onclick="deleteGroup(${idx})">刪除</button></div>
+      <div class="col-6"><button class="icon-btn" onclick="viewDetail(${idx})">瀏覽</button></div>
     `;
     rowsContainer.appendChild(row);
   });
 }
 
-/* 簡單的 escape（避免內容含單引號等） */
-function escapeHtml(s){ 
-    return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;'); 
-}
+function escapeHtml(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
 
-/* ======= Modal 行為 ======= */
 function openModal(){
   editingId = null;
-  inputId.value = '';
   inputName.value = '';
   inputRemark.value = '';
   siteSelect.value = '';
   addedSitesDiv.innerHTML = '';
   modal.style.display = 'block';
   document.getElementById('modalTitle').textContent = '新增群組';
+  restoreModalEditable();
 }
-function closeModal(){ modal.style.display = 'none'; }
+function closeModal(){ modal.style.display = 'none'; restoreModalEditable(); }
 
-/* 點 backdrop 關閉 */
 backdrop.addEventListener('click', e => { if(e.target === backdrop) closeModal(); });
 cancelBtn.addEventListener('click', closeModal);
 
-/* ======= 加入案場（Modal） ======= */
 function addSite(){
   const val = (siteSelect.value || '').trim();
   if(!val) return;
-  // 如果已存在就不重複加入
   const exists = Array.from(addedSitesDiv.querySelectorAll('.site-item span')).some(s => s.textContent === val);
   if(exists) return;
   const div = document.createElement('div'); div.className = 'site-item';
@@ -496,34 +272,26 @@ function addSite(){
   siteSelect.value = '';
 }
 
-/* ======= 儲存群組 ======= */
 function saveGroup(){
-  const id = inputId.value.trim();
   const name = inputName.value.trim();
   const remark = inputRemark.value.trim();
-  if(!id || !name){ 
-    alert('ID與名稱必填'); 
-    return; 
-  }
+  if(!name){ alert('群組名稱必填'); return; }
   const joins = Array.from(addedSitesDiv.querySelectorAll('.site-item span')).map(s => s.textContent);
 
-  if(editingId){
-    const g = groups.find(x => x.id === editingId);
-    if(g){ g.id = id; g.name = name; g.remark = remark; g.sites = joins; }
+  if(editingId !== null){
+    groups[editingId] = { name, remark, sites: joins };
   } else {
-    groups.push({ id, name, remark, sites: joins });
+    groups.push({ name, remark, sites: joins });
   }
   closeModal();
   render();
 }
 saveBtn.addEventListener('click', saveGroup);
 
-/* ======= 編輯 / 刪除 / 明細 ======= */
-function openEdit(id){
-  const g = groups.find(x => x.id === id);
+function openEdit(idx){
+  const g = groups[idx];
   if(!g) return;
-  editingId = id;
-  inputId.value = g.id;
+  editingId = idx;
   inputName.value = g.name;
   inputRemark.value = g.remark || '';
   addedSitesDiv.innerHTML = '';
@@ -534,51 +302,57 @@ function openEdit(id){
   });
   document.getElementById('modalTitle').textContent = '編輯群組';
   modal.style.display = 'block';
+  restoreModalEditable();
 }
 
-function deleteGroup(id){
+function deleteGroup(idx){
   if(!confirm('確定刪除此群組？')) return;
-  groups = groups.filter(g => g.id !== id);
+  groups.splice(idx,1);
   render();
 }
 
-function viewDetail(id){
-  const g = groups.find(x => x.id === id);
+// --- 瀏覽模式完全只讀 ---
+function viewDetail(idx){
+  const g = groups[idx];
   if(!g) return;
-  // 用原本 modal 顯示明細（不可編輯）
-  inputId.value = g.id;
+
   inputName.value = g.name;
   inputRemark.value = g.remark || '';
   addedSitesDiv.innerHTML = '';
+
   (g.sites || []).forEach(s => {
-    const div = document.createElement('div'); div.className = 'site-item';
-    div.innerHTML = `<span>${escapeHtml(s)}</span>`; // 不提供刪除
+    const div = document.createElement('div'); 
+    div.className = 'site-item';
+    div.innerHTML = `<span>${escapeHtml(s)}</span>`; // 只顯示文字
     addedSitesDiv.appendChild(div);
   });
-  document.getElementById('modalTitle').textContent = '群組明細';
-  // 設為只讀
-  inputId.disabled = true; inputName.disabled = true; inputRemark.disabled = true; siteSelect.disabled = true;
+
+  document.getElementById('modalTitle').textContent = '群組瀏覽';
+  inputName.disabled = true;
+  inputRemark.disabled = true;
+  siteSelect.disabled = true;
   saveBtn.style.display = 'none';
+
+  // 隱藏加入案場按鈕
+  const formRows = addedSitesDiv.parentNode.querySelectorAll('.form-row button, #siteSelect');
+  formRows.forEach(el => el.style.display = 'none');
+
   modal.style.display = 'block';
-  // 當關閉時恢復可編輯（在 closeModal 可加處理）
 }
 
-/* 當 Modal 關閉時恢復欄位可編輯性（避免明細後無法再次編輯） */
 function restoreModalEditable(){
-  inputId.disabled = false; inputName.disabled = false; inputRemark.disabled = false; siteSelect.disabled = false;
+  inputName.disabled = false;
+  inputRemark.disabled = false;
+  siteSelect.disabled = false;
   saveBtn.style.display = 'inline-block';
+  // 顯示加入案場按鈕
+  const formRows = addedSitesDiv.parentNode.querySelectorAll('.form-row button, #siteSelect');
+  formRows.forEach(el => el.style.display = 'inline-block');
 }
-backdrop.addEventListener('click', ()=> restoreModalEditable() );
-cancelBtn.addEventListener('click', ()=> restoreModalEditable() );
 
-/* ======= 搜尋功能（簡單 filter） ======= */
 function searchGroup(){
-  const sid = document.getElementById('searchId').value.trim().toLowerCase();
   const sname = document.getElementById('searchName').value.trim().toLowerCase();
-  const filtered = groups.filter(g => {
-    return (!sid || g.id.toLowerCase().includes(sid)) && (!sname || g.name.toLowerCase().includes(sname));
-  });
-  // 顯示過濾結果
+  const filtered = groups.filter(g => !sname || g.name.toLowerCase().includes(sname));
   rowsContainer.innerHTML = '';
   if(filtered.length === 0){
     rowsContainer.appendChild(Object.assign(document.createElement('div'), { className:'empty', textContent:'查無資料' }));
@@ -590,27 +364,21 @@ function searchGroup(){
     const row = document.createElement('div'); row.className = 'list-row';
     row.innerHTML = `
       <div class="col-1">${idx+1}</div>
-      <div class="col-2">${escapeHtml(g.id)}</div>
-      <div class="col-3">${escapeHtml(g.name)}</div>
-      <div class="col-4"><button class="icon-btn" onclick="openEdit('${g.id}')">編輯</button></div>
-      <div class="col-5"><button class="icon-btn" onclick="deleteGroup('${g.id}')">刪除</button></div>
-      <div class="col-6"><button class="icon-btn" onclick="viewDetail('${g.id}')">明細</button></div>
+      <div class="col-2">${escapeHtml(g.name)}</div>
+      <div class="col-3">${escapeHtml(g.remark || '')}</div>
+      <div class="col-4"><button class="icon-btn" onclick="openEdit(${idx})">編輯</button></div>
+      <div class="col-5"><button class="icon-btn" onclick="deleteGroup(${idx})">刪除</button></div>
+      <div class="col-6"><button class="icon-btn" onclick="viewDetail(${idx})">瀏覽</button></div>
     `;
     rowsContainer.appendChild(row);
   });
 }
 
-/* ======= TOP 按鈕 ======= */
 const topBtn = document.getElementById('topBtn');
 window.addEventListener('scroll', () => { topBtn.style.display = (window.scrollY > 100) ? 'flex' : 'none'; });
 function scrollToTop(){ window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
-/* 初始 render */
 render();
 </script>
 </body>
 </html>
-
-
-
-

@@ -34,7 +34,7 @@
       width:100%;
       max-width:920px;
       background:var(--card);
-      border-radius:var(--radius);
+      border-radius:0;
       box-shadow:var(--shadow);
       box-sizing:border-box;
       margin-top:20px;
@@ -75,6 +75,7 @@
     .btn-primary{background:var(--primary-light); color:white}
     .btn-ghost{background:transparent; color:white; border:1px solid rgba(255,255,255,0.6)}
     .btn-danger{background:var(--danger); color:white}
+    .btn-close{ padding:8px 12px; border-radius:8px; border:1px solid #ccc; background:#ffffff; color:#374151; font-weight:600; font-size:14px; cursor:pointer; }
 
     /* 列表樣式 */
     .list{
@@ -214,8 +215,8 @@
         </div>
         <!-- Modal 按鈕列 -->
         <div class="modal-footer">
-          <button class="btn btn-ghost" id="cancelBtn">取消</button>
-          <button class="btn btn-primary" id="saveBtn">儲存</button>
+          <button class="btn-close" id="cancelBtn">取消</button>
+          <button class="btn btn-primary" id="saveBtn">確認</button>
         </div>
       </div>
     </div>

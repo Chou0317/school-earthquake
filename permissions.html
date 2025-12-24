@@ -25,7 +25,7 @@ body{padding:24px;display:flex;justify-content:center;}
   width:100%;
   max-width:1100px;
   background:var(--card);
-  border-radius:var(--radius);
+  border-radius:0;
   box-shadow:var(--shadow);
   overflow:hidden;
 }
@@ -132,23 +132,23 @@ body{padding:24px;display:flex;justify-content:center;}
 
 <div class="card">
   <div class="header">
-    <div class="title">權限管理</div>
+    <div class="title">群組管理</div>
     <div class="actions">
-      <button class="btn btn-primary" onclick="openModal()">＋ 新增權限</button>
+      <button class="btn btn-primary" onclick="openModal()">＋ 新增群組</button>
     </div>
   </div>
 
   <div class="list">
     <div class="list-head">
       <div class="col-1">序號</div>
-      <div class="col-2">權限名稱</div>
-      <div class="col-3">權限說明</div>
+      <div class="col-2">群組名稱</div>
+      <div class="col-3">群組說明</div>
       <div class="col-4">編輯</div>
       <div class="col-5">刪除</div>
-      <div class="col-6">明細</div>
+      <div class="col-6">瀏覽</div>
     </div>
     <div id="rowsContainer">
-      <div class="empty">目前沒有權限資料</div>
+      <div class="empty">目前沒有群組資料</div>
     </div>
   </div>
 </div>
@@ -157,16 +157,16 @@ body{padding:24px;display:flex;justify-content:center;}
 <div id="modal" style="display:none">
   <div class="modal-backdrop" onclick="closeModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
-      <div class="modal-header" id="modalTitle">新增權限</div>
+      <div class="modal-header" id="modalTitle">新增群組</div>
       <div class="modal-body">
 
         <div class="form-row">
-          <label>權限名稱</label>
+          <label>群組名稱</label>
           <input id="permName" type="text" placeholder="輸入權限名稱" />
         </div>
 
         <div class="form-row">
-          <label>權限說明</label>
+          <label>群組說明</label>
           <input id="permDesc" type="text" placeholder="輸入說明" />
         </div>
 
@@ -187,15 +187,29 @@ body{padding:24px;display:flex;justify-content:center;}
             <div class="permission-group">
               <label><input type="checkbox" data-group="2u" onchange="toggleGroup(this)" /> 2U 主機管理</label>
               <div class="permission-children">
-                <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 2U 主機管理</label>
-                <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 連線狀態</label>
-                <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 地震模擬</label>
-                <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 地震模擬（群組）</label>
-                <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 地震模擬排程</label>
+                <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 2U 主機設定</label>
                 <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 群組管理</label>
                 <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 氣象署連線設定</label>
                 <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 地震發報設定</label>
-                <label><input type="checkbox" data-parent="2u" onchange="updateParentCheckbox(this)" /> 管理紀錄</label>
+              </div>
+            </div>
+
+            <!-- 狀態管理 -->
+            <div class="permission-group">
+              <label><input type="checkbox" data-group="state" onchange="toggleGroup(this)" /> 狀態管理</label>
+              <div class="permission-children">
+                <label><input type="checkbox" data-parent="state" onchange="updateParentCheckbox(this)" /> 連線狀態</label>
+                <label><input type="checkbox" data-parent="state" onchange="updateParentCheckbox(this)" /> 管理紀錄</label>
+              </div>
+            </div>
+
+            <!-- 模擬演練 -->
+            <div class="permission-group">
+              <label><input type="checkbox" data-group="exercise" onchange="toggleGroup(this)" /> 模擬演練</label>
+              <div class="permission-children">
+                <label><input type="checkbox" data-parent="exercise" onchange="updateParentCheckbox(this)" /> 地震模擬</label>
+                <label><input type="checkbox" data-parent="exercise" onchange="updateParentCheckbox(this)" /> 地震模擬（群組）</label>
+                <label><input type="checkbox" data-parent="exercise" onchange="updateParentCheckbox(this)" /> 地震模擬排程</label>
               </div>
             </div>
 
@@ -208,7 +222,7 @@ body{padding:24px;display:flex;justify-content:center;}
             <div class="permission-group">
               <label><input type="checkbox" data-group="backend" onchange="toggleGroup(this)" /> 後台設定</label>
               <div class="permission-children">
-                <label><input type="checkbox" data-parent="backend" onchange="updateParentCheckbox(this)" /> 權限管理</label>
+                <label><input type="checkbox" data-parent="backend" onchange="updateParentCheckbox(this)" /> 群組管理</label>
                 <label><input type="checkbox" data-parent="backend" onchange="updateParentCheckbox(this)" /> 帳號管理</label>
                 <label><input type="checkbox" data-parent="backend" onchange="updateParentCheckbox(this)" /> 後台紀錄</label>
                 <label><input type="checkbox" data-parent="backend" onchange="updateParentCheckbox(this)" /> 變更密碼</label>
@@ -242,7 +256,7 @@ const countText = document.getElementById('countText');
 function render(){
   rowsContainer.innerHTML = '';
   if(permissions.length === 0){
-    rowsContainer.innerHTML = '<div class="empty">目前沒有權限資料</div>';
+    rowsContainer.innerHTML = '<div class="empty">目前沒有群組資料</div>';
     return;
   }
 
@@ -255,7 +269,7 @@ function render(){
       <div class="col-3">${p.desc}</div>
       <div class="col-4"><button class="icon-btn" onclick="editPerm(${i})">編輯</button></div>
       <div class="col-5"><button class="icon-btn" onclick="delPerm(${i})">刪除</button></div>
-      <div class="col-6"><button class="icon-btn" onclick="viewPerm(${i})">明細</button></div>
+      <div class="col-6"><button class="icon-btn" onclick="viewPerm(${i})">瀏覽</button></div>
     `;
     rowsContainer.appendChild(row);
   });
@@ -264,7 +278,7 @@ function render(){
 /* ================= Modal ================= */
 function openModal(){
   editingIndex = null;
-  document.getElementById('modalTitle').textContent = '新增權限';
+  document.getElementById('modalTitle').textContent = '新增群組';
   document.getElementById('permName').value='';
   document.getElementById('permDesc').value='';
   document.getElementById('permName').disabled=false;
@@ -281,7 +295,7 @@ function closeModal(e){
 function savePermission(){
   const name = document.getElementById('permName').value.trim();
   const desc = document.getElementById('permDesc').value.trim();
-  if(!name){ alert('請輸入權限名稱'); return; }
+  if(!name){ alert('請輸入群組名稱'); return; }
 
   const checks = Array.from(document.querySelectorAll('#modal input[type=checkbox]:checked'))
     .map(c=>c.parentElement.textContent.trim());
@@ -297,7 +311,7 @@ function savePermission(){
 function editPerm(i){
   const p = permissions[i];
   editingIndex = i;
-  document.getElementById('modalTitle').textContent = '編輯權限';
+  document.getElementById('modalTitle').textContent = '編輯群組';
   document.getElementById('permName').value = p.name;
   document.getElementById('permDesc').value = p.desc;
 
@@ -314,7 +328,7 @@ function editPerm(i){
 }
 
 function delPerm(i){
-  if(confirm('確定刪除此權限？')){
+  if(confirm('確定刪除此群組？')){
     permissions.splice(i,1);
     render();
   }
@@ -322,7 +336,7 @@ function delPerm(i){
 
 function viewPerm(i){
   const p = permissions[i];
-  document.getElementById('modalTitle').textContent = '權限明細';
+  document.getElementById('modalTitle').textContent = '權限瀏覽';
   document.getElementById('permName').value = p.name;
   document.getElementById('permDesc').value = p.desc;
 
