@@ -4,7 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>氣象署連線設定</title>
-
 <style>
 :root{
   --bg:#6c6c6c;
@@ -16,27 +15,19 @@
   --radius:12px;
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans TC','Microsoft JhengHei',sans-serif;
 }
-
-html,body{
-  height:100%;
-  margin:0;
-  background:var(--bg);
-}
-
-body{
-  padding:24px;
-  display:flex;
-  justify-content:center;
-}
+html,body{height:100%;margin:0;background:var(--bg);}
+body{padding:24px;display:flex;justify-content:center;}
 
 /* ================= 卡片 ================= */
 .card{
   width:100%;
-  max-width:980px;
+  max-width:1300px;
   background:var(--card);
   border-radius:0;
   box-shadow:var(--shadow);
   overflow:hidden;
+  display:flex;
+  flex-direction:column;
 }
 
 /* ================= Header ================= */
@@ -55,19 +46,17 @@ body{
   gap:12px;
   padding:12px 20px;
   background:#f9fafb;
+  align-items:center;
 }
-
 .form-group{
   display:flex;
   align-items:center;
   gap:6px;
 }
-
 label{
   color:var(--muted);
   white-space:nowrap;
 }
-
 select,input{
   height:32px;
   padding:4px 8px;
@@ -75,7 +64,6 @@ select,input{
   border:1px solid #ccc;
   font-size:14px;
 }
-
 .btn-search{
   height:32px;
   padding:0 14px;
@@ -85,43 +73,98 @@ select,input{
   color:#fff;
   cursor:pointer;
   font-weight:600;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
+
+/* 每頁筆數選單 */
+#pageSizeSelect{height:32px;padding:4px 8px;border-radius:6px;border:1px solid #ccc;font-size:14px;}
+
+/* ================= 上方資訊 ================= */
+.top-info{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 20px;
+  color:var(--muted);
+  font-size:14px;
+}
+.pagination{ display:flex; gap:4px; flex-wrap:wrap; }
+.pagination span{ cursor:pointer; padding:3px 5px; color:var(--primary); font-weight:600; font-size:12px; }
+.pagination span.current{ font-weight:700; text-decoration:underline; cursor:default; color:#111; }
+.pagination span.disabled{ color:#999; cursor:default; }
 
 /* ================= 列表 ================= */
 .list{
   border-top:1px solid #eee;
+  overflow:auto;
+  flex:1;
 }
-
 .list-head,.list-row{
   display:flex;
   align-items:center;
-  gap:12px;
   padding:10px 8px;
+  min-width:1000px;
 }
-
 .list-head{
   background:#f9fafb;
   color:var(--muted);
   font-weight:700;
+  position:sticky;
+  top:0;
+  z-index:2;
 }
-
 .list-row{
   border-bottom:1px solid #f2f2f2;
 }
 
-.col-1{width:60px;text-align:center;}
-.col-2,.col-3{flex:1;}
-.col-4,.col-5{width:120px;text-align:center;}
-.col-6{width:140px;text-align:center;}
+/* 欄位設定：序號靠左，氣象署連線靠右，其他欄位置中，文字垂直置中 */
+.col-1{
+  flex:0 0 60px;
+  max-width:60px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  padding-left:8px;
+  box-sizing:border-box;
+}
+.col-2,.col-3,.col-4,.col-5{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:120px;
+}
+.col-6{
+  flex:0 0 100px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  padding-right:8px;
+  box-sizing:border-box;
+}
+
+.list-row .col-1 {
+  justify-content:flex-start;
+  padding-left:16px; /* 底下序號文字往右一點 */
+}
+
+.list-row .col-6 {
+  justify-content:flex-end;
+  padding-right:20px; /* 底下按鈕往左一點 */
+}
 
 .icon-btn{
-  padding:6px 10px;
+  padding:6px 8px;
   border-radius:8px;
-  border:1px solid rgba(0,0,0,0.1);
-  background:#fff;
+  border:1px solid rgba(0,0,0,0.06);
+  background:transparent;
   cursor:pointer;
   font-weight:600;
 }
+
+.empty{ padding:28px; text-align:center; color:var(--muted); }
 
 /* ================= modal ================= */
 .modal-backdrop{
@@ -133,7 +176,6 @@ select,input{
   justify-content:center;
   z-index:100;
 }
-
 .modal{
   background:#fff;
   width:92%;
@@ -141,22 +183,14 @@ select,input{
   border-radius:12px;
   overflow:hidden;
 }
-
 .modal-header{
   background:var(--primary);
   color:#fff;
   padding:14px 18px;
   font-weight:600;
 }
-
-.modal-body{
-  padding:18px;
-}
-
-.modal-body .form-group{
-  margin-bottom:12px;
-}
-
+.modal-body{padding:18px;}
+.modal-body .form-group{margin-bottom:12px;}
 .modal-footer{
   padding:12px 18px;
   display:flex;
@@ -164,7 +198,6 @@ select,input{
   gap:8px;
   background:#f9fafb;
 }
-
 .btn{
   padding:6px 14px;
   border-radius:6px;
@@ -172,7 +205,14 @@ select,input{
   cursor:pointer;
   font-weight:600;
 }
-
+.icon-btn{
+  padding:6px 10px;
+  border-radius:8px;
+  border:1px solid rgba(0,0,0,0.1);
+  background:#fff;
+  cursor:pointer;
+  font-weight:600;
+}
 .btn-primary{background:var(--primary-light);color:#fff;}
 .btn-cancel{background:#e5e7eb;}
 .btn-close{
@@ -200,15 +240,21 @@ select,input{
   display:none;
   cursor:pointer;
 }
+
+/* 底部頁碼置中 */
+.pagination-container{
+  display:flex;
+  justify-content:center;
+  padding:8px 0;
+}
 </style>
 </head>
 
 <body>
-
 <div class="card">
   <div class="header">氣象署連線設定</div>
 
-  <!-- 搜尋 -->
+  <!-- 搜尋列 -->
   <div class="search-row">
     <div class="form-group">
       <label>縣市</label>
@@ -220,16 +266,28 @@ select,input{
     </div>
     <div class="form-group">
       <label>ID</label>
-      <input id="idInput" />
+      <input id="idInput" placeholder="輸入ID"/>
     </div>
     <div class="form-group">
       <label>案場名稱</label>
-      <input id="nameInput" />
+      <input id="nameInput" placeholder="輸入案場名稱"/>
+    </div>
+    <div class="form-group">
+      <label>每頁筆數</label>
+      <select id="pageSizeSelect">
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="75">75</option>
+        <option value="100">100</option>
+      </select>
     </div>
     <button class="btn-search" onclick="search()">搜尋</button>
   </div>
 
-  <div id="countText" style="padding:8px 20px;color:var(--muted)">共 0 筆資料</div>
+  <div class="top-info">
+    <span id="countText">共 0 筆資料</span>
+    <div class="pagination" id="topPagination"></div>
+  </div>
 
   <!-- 列表 -->
   <div class="list">
@@ -243,6 +301,10 @@ select,input{
     </div>
     <div id="rows"></div>
   </div>
+
+  <div class="pagination-container">
+    <div class="pagination" id="bottomPagination"></div>
+  </div>
 </div>
 
 <!-- modal -->
@@ -252,8 +314,8 @@ select,input{
     <div class="modal-body">
       <div class="form-group"><label>ID</label><input id="mId" disabled></div>
       <div class="form-group"><label>案場名稱</label><input id="mName" disabled></div>
-      <div class="form-group"><label>氣象署帳號</label><input></div>
-      <div class="form-group"><label>氣象署密碼</label><input type="password"></div>
+      <div class="form-group"><label>氣象署帳號</label><input id="mAccount"></div>
+      <div class="form-group"><label>氣象署密碼</label><input type="password" id="mPwd"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-close" onclick="closeModal()">取消</button>
@@ -265,31 +327,65 @@ select,input{
 <button id="topBtn" onclick="scrollToTop()">TOP</button>
 
 <script>
+// 假資料
 const data=[
  {id:'S001',name:'測站A',city:'台北市',town:'內湖區'},
- {id:'S002',name:'測站B',city:'新北市',town:'板橋區'}
+ {id:'S002',name:'測站B',city:'新北市',town:'板橋區'},
+ {id:'S003',name:'測站C',city:'台北市',town:'信義區'},
+ {id:'S004',name:'測站D',city:'新北市',town:'淡水區'},
+ {id:'S005',name:'測站E',city:'台北市',town:'士林區'},
+ {id:'S006',name:'測站F',city:'新北市',town:'新店區'},
+ {id:'S007',name:'測站G',city:'桃園市',town:'中壢區'},
+ {id:'S008',name:'測站H',city:'台中市',town:'北屯區'},
+ {id:'S009',name:'測站I',city:'高雄市',town:'左營區'},
+ {id:'S010',name:'測站J',city:'台南市',town:'安南區'}
 ];
+
+let currentPage=1;
+let pageSize=parseInt(document.getElementById('pageSizeSelect').value);
+let filteredData=[...data];
 
 const rows=document.getElementById('rows');
 const countText=document.getElementById('countText');
+const topPagination=document.getElementById('topPagination');
+const bottomPagination=document.getElementById('bottomPagination');
 
 function render(list){
  rows.innerHTML='';
+ const start=(currentPage-1)*pageSize;
+ const end=start+pageSize;
+ const pageData=list.slice(start,end);
  countText.textContent=`共 ${list.length} 筆資料`;
- list.forEach((e,i)=>{
+ pageData.forEach((e,i)=>{
   const r=document.createElement('div');
   r.className='list-row';
   r.innerHTML=`
-   <div class="col-1">${i+1}</div>
+   <div class="col-1">${start+i+1}</div>
    <div class="col-2">${e.id}</div>
    <div class="col-3">${e.name}</div>
    <div class="col-4">${e.city}</div>
    <div class="col-5">${e.town}</div>
-   <div class="col-6">
-     <button class="icon-btn" onclick="openModal('${e.id}','${e.name}')">設定</button>
-   </div>`;
+   <div class="col-6"><button class="icon-btn" onclick="openModal('${e.id}','${e.name}')">設定</button></div>`;
   rows.appendChild(r);
  });
+ renderPagination(list.length);
+}
+
+// 其餘搜尋、分頁、modal JS 與前面相同
+function search(){
+  const city=document.getElementById('citySelect').value;
+  const town=document.getElementById('townSelect').value;
+  const id=document.getElementById('idInput').value.trim().toLowerCase();
+  const name=document.getElementById('nameInput').value.trim().toLowerCase();
+  pageSize=parseInt(document.getElementById('pageSizeSelect').value);
+  currentPage=1;
+  filteredData=data.filter(d=>{
+    return (!city||d.city===city)
+        &&(!town||d.town===town)
+        &&(!id||d.id.toLowerCase().includes(id))
+        &&(!name||d.name.toLowerCase().includes(name));
+  });
+  render(filteredData);
 }
 
 function openModal(id,name){
@@ -299,12 +395,118 @@ function openModal(id,name){
 }
 function closeModal(){document.getElementById('modal').style.display='none';}
 
-window.addEventListener('scroll',()=>{
- document.getElementById('topBtn').style.display=window.scrollY>120?'block':'none';
-});
+// 頁碼功能
+function renderPagination(total){
+ const totalPages=Math.ceil(total/pageSize);
+ function makePages(current,total){
+   const pages=[];
+   if(total<=7){
+     for(let i=1;i<=total;i++) pages.push(i);
+   } else {
+     if(current<=4){
+       pages.push(1,2,3,4,5,'...',total);
+     } else if(current>=total-3){
+       pages.push(1,'...',total-4,total-3,total-2,total-1,total);
+     } else {
+       pages.push(1,'...',current-1,current,current+1,'...',total);
+     }
+   }
+   return pages;
+ }
+ const pages=makePages(currentPage,totalPages);
+
+ [topPagination,bottomPagination].forEach(container=>{
+   container.innerHTML='';
+   if(container===topPagination){
+     const first=document.createElement('span'); first.textContent='第一頁';
+     first.className=currentPage===1?'disabled':''; first.onclick=()=>{if(currentPage!==1){currentPage=1;render(filteredData);}};
+     container.appendChild(first);
+   } else {
+     const prev=document.createElement('span'); prev.textContent='上一頁';
+     prev.className=currentPage===1?'disabled':''; prev.onclick=()=>{if(currentPage>1){currentPage--;render(filteredData);}};
+     container.appendChild(prev);
+   }
+
+   pages.forEach(p=>{
+     const s=document.createElement('span');
+     s.textContent=p;
+     if(p==='...'){s.className='disabled';}
+     else if(p===currentPage){s.className='current';}
+     else{s.onclick=()=>{currentPage=p;render(filteredData);};}
+     container.appendChild(s);
+   });
+
+   if(container===topPagination){
+     const last=document.createElement('span'); last.textContent='最後一頁';
+     last.className=currentPage===totalPages?'disabled':''; last.onclick=()=>{if(currentPage!==totalPages){currentPage=totalPages;render(filteredData);}};
+     container.appendChild(last);
+   } else {
+     const next=document.createElement('span'); next.textContent='下一頁';
+     next.className=currentPage===totalPages?'disabled':''; next.onclick=()=>{if(currentPage<totalPages){currentPage++;render(filteredData);}};
+     container.appendChild(next);
+   }
+ });
+}
+
+// scroll top
+window.addEventListener('scroll',()=>{document.getElementById('topBtn').style.display=window.scrollY>120?'block':'none';});
 function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
 
-render(data);
+// 初始化
+function populateCityTown(){
+  const citySelect = document.getElementById('citySelect');
+  const townSelect = document.getElementById('townSelect');
+
+  // 先清空選單
+  citySelect.innerHTML = '';
+  townSelect.innerHTML = '';
+
+  // 加入 "-" 選項
+  const emptyCityOption = document.createElement('option');
+  emptyCityOption.value = '';
+  emptyCityOption.textContent = '-';
+  citySelect.appendChild(emptyCityOption);
+
+  const emptyTownOption = document.createElement('option');
+  emptyTownOption.value = '';
+  emptyTownOption.textContent = '-';
+  townSelect.appendChild(emptyTownOption);
+
+  // 取得所有縣市（去重）
+  const cities = [...new Set(data.map(d => d.city))];
+  cities.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c;
+    o.textContent = c;
+    citySelect.appendChild(o);
+  });
+
+  // 當縣市改變時，更新鄉鎮選單
+  citySelect.addEventListener('change', () => {
+    const selectedCity = citySelect.value;
+
+    // 清空鄉鎮選單
+    townSelect.innerHTML = '';
+    const emptyOption = document.createElement('option');
+    emptyOption.value = '';
+    emptyOption.textContent = '-';
+    townSelect.appendChild(emptyOption);
+
+    if(selectedCity){
+      // 過濾出該縣市的鄉鎮，去重
+      const towns = [...new Set(data.filter(d => d.city === selectedCity).map(d => d.town))];
+      towns.forEach(t => {
+        const o = document.createElement('option');
+        o.value = t;
+        o.textContent = t;
+        townSelect.appendChild(o);
+      });
+    }
+  });
+}
+
+populateCityTown();
+render(filteredData);
 </script>
 </body>
 </html>

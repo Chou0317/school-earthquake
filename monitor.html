@@ -4,7 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>即時監控</title>
-
 <style>
 :root{
   --bg: #6c6c6c;
@@ -17,192 +16,185 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
 }
 
-/* 基本頁面設定 */
-html,body{margin:0; background:var(--bg);}
-body{ display:flex; flex-direction:column; align-items:center; padding:24px; }
+html, body { margin:0; height:100%; background:var(--bg); }
+body { display:flex; flex-direction:column; align-items:center; padding:24px; }
 
-/* 卡片容器：方框 */
-.card{ 
-    width:100%; 
-    max-width:1200px; 
-    background:var(--card); 
-    border-radius:0;  
-    box-shadow:var(--shadow); 
-    box-sizing:border-box; 
-    overflow:hidden;        
-    margin-bottom:24px; 
+.card{
+  width:100%;
+  max-width:1300px;
+  background:var(--card);
+  border-radius:0;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  height:90vh;
 }
 
-.header{ 
-    display:flex; 
-    align-items:center; 
-    justify-content:space-between; 
-    gap:12px; 
-    padding:16px 20px; 
-    background:var(--primary); 
-    color:white; 
+/* 標題 */
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:16px 20px;
+  background:var(--primary);
+  color:white;
 }
-
 .title{ font-size:20px; font-weight:600; }
 
-/* 篩選列 */
-.select-row{ display:flex; gap:12px; padding:12px 20px; align-items:center; flex-wrap:wrap; }
-.select-row select{ padding:6px 10px; border-radius:8px; border:1px solid #e6e6e6; }
-.page-size-select{ margin-left:12px; }
-
-/* 分頁 */
-.pagination{
+/* 搜尋列 */
+.search-block{
+  display:block;
+  background:#f9fafb;
+  padding:12px 20px;
+  border-radius:8px;
+  margin:12px 16px 0 16px;
+}
+.select-row{
   display:flex;
-  justify-content:flex-end;
-  align-items:center;
-  gap:4px;
+  gap:12px;
   flex-wrap:wrap;
-  margin-left:auto;
+  align-items:center;
 }
-.pagination button{
-  padding:4px 8px;
-  border-radius:6px;
-  border:1px solid #ccc;
-  cursor:pointer;
-  background:white;
-}
-.pagination button.active{
-  background:var(--primary-light);
-  color:white;
-  border-color:var(--primary-light);
-}
-.pagination span{ font-size:14px; margin:0 4px; }
+.select-row label{ display:flex; align-items:center; gap:6px; font-size:14px; color:var(--muted);}
+.select-row select{ padding:6px 10px; border-radius:8px; border:1px solid #e6e6e6; }
 
-/* 資料筆數統計 */
-.stats{ padding:0 20px 12px; color:var(--muted); font-size:14px; }
+/* 共幾筆資料及上方頁碼獨立區塊 */
+.top-info{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:2px 12px;
+  font-size:16px;
+  color:var(--muted);
+  background:#fff;
+  padding:2px 12px;
+  border-radius:8px;
+}
 
-/* 表格 */
-.list{ width:100%; border-top:1px solid #eee; border-bottom:1px solid #eee; }
-.list-row, .list-head{ display:flex; align-items:center; gap:12px; padding:10px 8px; box-sizing:border-box; flex-shrink:0; }
-.list-head{ font-weight:700; color:var(--muted); background:#f9fafb; position:sticky; top:0; z-index:1; }
+/* 表格滾動區 */
+.list-wrapper{ flex:1; overflow-y:auto; margin:12px 16px 0 16px; }
+.list{
+  width:100%;
+  border-top:1px solid #eee;
+  border-bottom:1px solid #eee;
+  margin-top:0;
+}
+.list-head, .list-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:10px 8px;
+  box-sizing:border-box;
+  flex-shrink:0;
+}
+.list-head{
+  font-weight:700;
+  color:var(--muted);
+  background:#f9fafb;
+  position:sticky;
+  top:0;
+  z-index:2;
+}
 .list-row{ border-bottom:1px solid #f2f2f2; font-size:14px; }
-.col-1{ width:50px; text-align:center; flex-shrink:0; } 
+.col-1{ width:50px; text-align:center; flex-shrink:0; }
 .col-2{ width:80px; text-align:center; flex-shrink:0; }
 .col-3{ width:80px; text-align:center; flex-shrink:0; }
-.col-4{ width:100px; flex:1; }
-.col-5,.col-6,.col-7,.col-8,.col-9,.col-10,.col-11,.col-12{ width:90px; text-align:center; flex-shrink:0; }
-
+.col-4{ flex:1; text-align:center; }
+.col-5{ flex:1; text-align:center; }
+.col-6,.col-7,.col-8,.col-9,.col-10,.col-11,.col-12{ width:90px; text-align:center; flex-shrink:0; }
 .empty{ padding:28px; text-align:center; color:var(--muted); }
 
-#topBtn{
-    position:fixed;
-    bottom:20px;
-    right:20px;
-    padding:10px 14px;
-    border:none;
-    border-radius:8px;
-    background:var(--primary-light);
-    color:white;
-    cursor:pointer;
-    display:none;
-    box-shadow:var(--shadow);
-    z-index:10;
-}
+/* 分頁 */
+.pagination{ display:flex; gap:4px; flex-wrap:wrap; }
+.pagination span{ cursor:pointer; padding:3px 5px; color:var(--primary); font-weight:600; font-size:12px; background:transparent; box-shadow:none; }
+.pagination span.current{ font-weight:700; text-decoration:underline; cursor:default; color:#111; }
+.pagination span.disabled{ color:#999; cursor:default; }
 
-.modal-backdrop{ position:fixed; inset:0; background:rgba(2,6,23,0.45); display:flex; align-items:center; justify-content:center; display:none; z-index:1000; }
-.modal{ background:var(--card); border-radius:12px; padding:0; max-width:560px; width:92%; box-shadow:var(--shadow); overflow:hidden; }
-.modal-header{ padding:16px 20px; background:var(--primary); color:white; font-size:18px; font-weight:600; }
-.modal-body{ padding:18px; }
-.modal-footer{ display:flex; gap:8px; justify-content:flex-end; padding:12px 18px; background:#f9fafb; }
-
-.btn{ border:0; padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:600; font-size:14px; }
-.btn-primary{ background:var(--primary-light); color:white; }
-.btn-ghost{ background:transparent; color:var(--primary); border:1px solid var(--primary); }
-.btn-detail { padding:6px 8px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); background:transparent; cursor:pointer; font-weight:600; font-size:14px; }
-
+/* 底部分頁置中 */
+.pagination-container{ display:flex; justify-content:center; padding:8px 0; background:#fff; margin:0 16px; border-radius:8px; }
 .status-circle{ display:inline-block; width:14px; height:14px; border-radius:50%; margin:auto; }
-.status-online{background:#22c55e;} 
-.status-offline{background:#ef4444;} 
+.status-online{background:#22c55e;}
+.status-offline{background:#ef4444;}
 </style>
 </head>
 <body>
 
-<div class="card" role="region" aria-label="即時監控卡片">
+<div class="card">
   <div class="header">
     <div class="title">即時監控</div>
   </div>
 
-  <!-- 篩選 + 每頁筆數 + 分頁 -->
-  <div class="select-row">
-    <label>縣市:
-      <select id="citySelect">
-        <option value="">全部</option>
-        <option value="臺北市">臺北市</option>
-        <option value="新北市">新北市</option>
-      </select>
-    </label>
-    <label>鄉鎮:
-      <select id="townSelect">
-        <option value="">全部</option>
-        <option value="中正區">中正區</option>
-        <option value="信義區">信義區</option>
-      </select>
-    </label>
-    <label>每頁筆數:
-      <select id="pageSizeSelect" class="page-size-select">
-        <option value="25">25</option>
-        <option value="50" selected>50</option>
-        <option value="75">75</option>
-        <option value="100">100</option>
-      </select>
-    </label>
-
-    <!-- 分頁容器 -->
-    <div class="pagination" id="pagination"></div>
+  <!-- 搜尋列區塊 -->
+  <div class="search-block">
+    <div class="select-row">
+      <label>縣市:
+        <select id="citySelect">
+          <option value="">-</option>
+          <option value="臺北市">臺北市</option>
+          <option value="新北市">新北市</option>
+        </select>
+      </label>
+      <label>鄉鎮:
+        <select id="townSelect">
+          <option value="">-</option>
+          <option value="中正區">中正區</option>
+          <option value="信義區">信義區</option>
+        </select>
+      </label>
+      <label>每頁筆數:
+        <select id="pageSizeSelect">
+          <option value="25" selected>25</option>
+          <option value="50">50</option>
+          <option value="75">75</option>
+          <option value="100">100</option>
+        </select>
+      </label>
+    </div>
   </div>
 
-  <div class="stats" id="stats">共 0 筆資料</div>
-
-  <div class="list" id="rowsContainer">
-    <div class="list-head">
-      <div class="col-1">序號</div>
-      <div class="col-2">ID</div>
-      <div class="col-3">縣市</div>
-      <div class="col-4">鄉鎮</div>
-      <div class="col-5">案場名稱</div>
-      <div class="col-6">TCP</div>
-      <div class="col-7">中保防災</div>
-      <div class="col-8">氣象</div>
-      <div class="col-9">DIO1</div>
-      <div class="col-10">DIO2</div>
-      <div class="col-11">DIO3</div>
-      <div class="col-12">連線</div>
-    </div>
-    <div class="empty">目前沒有資料。</div>
+  <!-- 共幾筆資料及上方頁碼 -->
+  <div class="top-info">
+    <span id="topStats">共 0 筆資料</span>
+    <span id="topPagination" class="pagination"></span>
   </div>
-</div>
 
-<button id="topBtn">Top</button>
-
-<div class="modal-backdrop" id="modal">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal-header" id="modalTitle">明細</div>
-    <div class="modal-body" id="modalBody"></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" id="closeModal">關閉</button>
+  <!-- 表格滾動區 -->
+  <div class="list-wrapper">
+    <div class="list" id="rowsContainer">
+      <div class="list-head">
+        <div class="col-1">序號</div>
+        <div class="col-2">ID</div>
+        <div class="col-3">縣市</div>
+        <div class="col-4">鄉鎮</div>
+        <div class="col-5">案場名稱</div>
+        <div class="col-6">TCP</div>
+        <div class="col-7">中保防災</div>
+        <div class="col-8">氣象</div>
+        <div class="col-9">DIO1</div>
+        <div class="col-10">DIO2</div>
+        <div class="col-11">DIO3</div>
+        <div class="col-12">連線</div>
+      </div>
+      <div class="empty">目前沒有資料。</div>
     </div>
+  </div>
+
+  <!-- 底部分頁 -->
+  <div class="pagination-container">
+    <span id="bottomPagination" class="pagination"></span>
   </div>
 </div>
 
 <script>
+// ---------- 假資料 ----------
 const rowsContainer = document.getElementById('rowsContainer');
-const stats = document.getElementById('stats');
 const citySelect = document.getElementById('citySelect');
 const townSelect = document.getElementById('townSelect');
 const pageSizeSelect = document.getElementById('pageSizeSelect');
-let pageSize = parseInt(pageSizeSelect.value,10);
-let currentPage = 1;
-const pagination = document.getElementById('pagination');
-
-const topBtn = document.getElementById('topBtn');
-const modal = document.getElementById('modal');
-const modalBody = document.getElementById('modalBody');
-const closeModal = document.getElementById('closeModal');
+const topPagination = document.getElementById('topPagination');
+const bottomPagination = document.getElementById('bottomPagination');
+const topStats = document.getElementById('topStats');
 
 let data = [];
 for(let i=1;i<=120;i++){
@@ -220,40 +212,85 @@ for(let i=1;i<=120;i++){
   });
 }
 
+let pageSize = parseInt(pageSizeSelect.value,10);
+let currentPage = 1;
+
 function statusCircle(value){
   return (value==='連線'||value==='正常'||value==='ON') ? '<span class="status-circle status-online"></span>' : '<span class="status-circle status-offline"></span>';
 }
 
-function renderPagination(totalItems){
-  pagination.innerHTML='';
-  const totalPages = Math.ceil(totalItems/pageSize);
-  if(totalPages<=1) return;
-  for(let i=1;i<=totalPages;i++){
-    const btn = document.createElement('button');
-    btn.textContent=i;
-    if(i===currentPage) btn.classList.add('active');
-    btn.addEventListener('click',()=>{ currentPage=i; render(citySelect.value, townSelect.value); });
-    pagination.appendChild(btn);
+function generatePageNumbers(totalPages, current){
+  let pages = [];
+  if(totalPages<=6){
+    for(let i=1;i<=totalPages;i++) pages.push(i);
+  } else {
+    if(current<=3){
+      pages = [1,2,3,'...',totalPages];
+    } else if(current>=totalPages-2){
+      pages = [1,'...',totalPages-2,totalPages-1,totalPages];
+    } else {
+      pages = [1,'...',current,'...',totalPages];
+    }
   }
+  return pages;
 }
 
-function render(filterCity='', filterTown=''){
-  rowsContainer.querySelectorAll('.list-row, .empty').forEach(el=>el.remove());
+function createPageSpan(text,page){
+  const span = document.createElement('span');
+  span.textContent = text;
+  if(page===null) span.classList.add('current');
+  else span.addEventListener('click',()=>{ currentPage=page; renderTable(); });
+  return span;
+}
+
+function renderPagination(totalItems){
+  const totalPages = Math.ceil(totalItems/pageSize);
+  const pages = generatePageNumbers(totalPages,currentPage);
+  topPagination.innerHTML='';
+  bottomPagination.innerHTML='';
+
+  // 上方頁碼
+  topPagination.appendChild(createPageSpan('第一頁',currentPage>1?1:null));
+  pages.forEach(p=>{
+    if(p==='...'){
+      const span=document.createElement('span'); span.textContent='...'; span.className='disabled'; topPagination.appendChild(span);
+    } else { topPagination.appendChild(createPageSpan(p,p===currentPage?null:p)); }
+  });
+  topPagination.appendChild(createPageSpan('最後一頁',currentPage<totalPages?totalPages:null));
+
+  // 下方頁碼
+  bottomPagination.appendChild(createPageSpan('上一頁',currentPage>1?currentPage-1:null));
+  pages.forEach(p=>{
+    if(p==='...'){
+      const span=document.createElement('span'); span.textContent='...'; span.className='disabled'; bottomPagination.appendChild(span);
+    } else { bottomPagination.appendChild(createPageSpan(p,p===currentPage?null:p)); }
+  });
+  bottomPagination.appendChild(createPageSpan('下一頁',currentPage<totalPages?currentPage+1:null));
+}
+
+function renderTable(){
+  const filterCity = citySelect.value;
+  const filterTown = townSelect.value;
   let filtered = data.filter(d=>(!filterCity||d.city===filterCity)&&(!filterTown||d.town===filterTown));
-  stats.textContent = `共 ${filtered.length} 筆資料`;
+  topStats.textContent=`共 ${filtered.length} 筆資料`;
+
+  const totalPages = Math.ceil(filtered.length/pageSize);
+  if(currentPage>totalPages) currentPage=totalPages>0?totalPages:1;
 
   renderPagination(filtered.length);
 
+  rowsContainer.querySelectorAll('.list-row,.empty').forEach(el=>el.remove());
   if(filtered.length===0){
-    const d = document.createElement('div'); d.className='empty'; d.textContent='目前沒有資料。'; rowsContainer.appendChild(d); return;
+    const div = document.createElement('div'); div.className='empty'; div.textContent='目前沒有資料。';
+    rowsContainer.appendChild(div); return;
   }
 
-  const startIndex = (currentPage-1)*pageSize;
-  const endIndex = startIndex+pageSize;
-  filtered.slice(startIndex,endIndex).forEach((d,i)=>{
+  const start = (currentPage-1)*pageSize;
+  const end = start+pageSize;
+  filtered.slice(start,end).forEach((d,i)=>{
     const row = document.createElement('div'); row.className='list-row';
     row.innerHTML = `
-      <div class="col-1">${startIndex+i+1}</div>
+      <div class="col-1">${start+i+1}</div>
       <div class="col-2">${d.id}</div>
       <div class="col-3">${d.city}</div>
       <div class="col-4">${d.town}</div>
@@ -270,29 +307,12 @@ function render(filterCity='', filterTown=''){
   });
 }
 
-citySelect.addEventListener('change', ()=>{ currentPage=1; render(citySelect.value, townSelect.value); });
-townSelect.addEventListener('change', ()=>{ currentPage=1; render(citySelect.value, townSelect.value); });
-pageSizeSelect.addEventListener('change', ()=>{ pageSize=parseInt(pageSizeSelect.value,10); currentPage=1; render(citySelect.value, townSelect.value); });
+citySelect.addEventListener('change',()=>{ currentPage=1; renderTable(); });
+townSelect.addEventListener('change',()=>{ currentPage=1; renderTable(); });
+pageSizeSelect.addEventListener('change',()=>{ pageSize=parseInt(pageSizeSelect.value,10); currentPage=1; renderTable(); });
 
-closeModal.addEventListener('click',()=> modal.style.display='none');
-window.addEventListener('click',(e)=>{ if(e.target===modal) modal.style.display='none'; });
-window.addEventListener('scroll',()=>{ topBtn.style.display = window.scrollY>200?'block':'none'; });
-topBtn.addEventListener('click',()=> window.scrollTo({top:0,behavior:'smooth'}));
-
-render();
-
-// 模擬即時更新
-setInterval(()=>{
-  data.forEach(d=>{
-    if(Math.random()<0.1){ d.tcp = Math.random()>0.5?'連線':'斷線'; }
-    if(Math.random()<0.1){ d.cbf = Math.random()>0.5?'正常':'異常'; }
-    if(Math.random()<0.1){ d.weather = Math.random()>0.5?'正常':'異常'; }
-    if(Math.random()<0.1){ d.dio1 = Math.random()>0.5?'ON':'OFF'; }
-    if(Math.random()<0.1){ d.dio2 = Math.random()>0.5?'ON':'OFF'; }
-    if(Math.random()<0.1){ d.dio3 = Math.random()>0.5?'ON':'OFF'; }
-  });
-  render(citySelect.value, townSelect.value);
-},5000);
+renderTable();
 </script>
 </body>
 </html>
+

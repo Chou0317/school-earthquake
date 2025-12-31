@@ -21,7 +21,7 @@
 html,body{ height:100%; margin:0; background:var(--bg); }
 body{ padding:24px; display:flex; justify-content:center; }
 
-.card{ width:100%; max-width:1200px; background:var(--card); border-radius:0; box-shadow:var(--shadow); overflow:hidden; }
+.card{ width:100%; max-width:1300px; background:var(--card); border-radius:0; box-shadow:var(--shadow); overflow:hidden; }
 
 .header{ padding:16px 20px; background:var(--primary); color:#fff; }
 .title{ font-size:20px; font-weight:600; }
@@ -29,12 +29,12 @@ body{ padding:24px; display:flex; justify-content:center; }
 .search-row{ display:flex; flex-wrap:wrap; gap:12px; padding:14px 20px; background:#f9fafb; }
 
 .form-group{ display:flex; align-items:center; gap:6px; }
-.form-group-row{ display:flex; align-items:center; gap:12px; } /* ID + 名稱 + 搜尋同一行 */
+.form-group-row{ display:flex; align-items:center; gap:12px; } 
 .form-group label{ font-size:14px; color:var(--muted); white-space:nowrap; }
 .search-row select, .search-row input{ height:32px; padding:4px 8px; border-radius:6px; border:1px solid #ccc; font-size:14px; }
 .btn-search{ height:32px; padding:0 16px; border:none; border-radius:6px; background:var(--primary-light); color:#fff; font-weight:600; cursor:pointer; }
 
-#countText{ padding:8px 20px; color:var(--muted); }
+#countText{ padding:8px 20px; color:var(--muted); display:flex; justify-content:space-between; align-items:center; }
 
 .list{ border-top:1px solid #eee; }
 .list-head, .list-row{ display:flex; gap:12px; padding:10px 8px; align-items:center; }
@@ -48,6 +48,12 @@ body{ padding:24px; display:flex; justify-content:center; }
 .col-8{ width:180px; text-align:center; }
 
 .empty{ padding:28px; text-align:center; color:var(--muted); }
+
+.pagination{ display:flex; gap:4px; flex-wrap:wrap; font-size:13px; }
+.pagination span{ cursor:pointer; padding:3px 5px; color:var(--primary); font-weight:600; }
+.pagination span.current{ font-weight:700; text-decoration:underline; cursor:default; color:#111; }
+.pagination span.disabled{ color:#aaa; cursor:default; pointer-events:none; }
+.pagination-container{ display:flex; justify-content:center; padding:8px 0; }
 
 #topBtn{ position:fixed; right:20px; bottom:20px; width:44px; height:44px; border:none; border-radius:8px; background:var(--primary-light); color:#fff; cursor:pointer; display:none; }
 </style>
@@ -87,7 +93,7 @@ body{ padding:24px; display:flex; justify-content:center; }
       <select id="typeSelect">
         <option value="-">-</option>
         <option>模擬</option>
-        <option>真實</option>
+        <option>地震速報</option>
       </select>
     </div>
 
@@ -98,22 +104,34 @@ body{ padding:24px; display:flex; justify-content:center; }
       <input type="date" id="endDate">
     </div>
 
-    <!-- ID & 名稱同一行 -->
+    <div class="form-group">
+      <label>每頁筆數</label>
+      <select id="pageSizeSelect">
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="75">75</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+
     <div class="form-group-row">
       <div class="form-group">
         <label>ID</label>
-        <input id="idInput" placeholder="主機ID">
+        <input id="idInput" placeholder="輸入ID">
       </div>
       <div class="form-group">
         <label>案場名稱</label>
-        <input id="nameInput" placeholder="主機名稱">
+        <input id="nameInput" placeholder="輸入案場名稱">
       </div>
       <button class="btn-search" onclick="search()">搜尋</button>
     </div>
 
   </div>
 
-  <div id="countText">共 0 筆資料</div>
+  <div id="countText">
+    <div id="totalCount">共 0 筆資料</div>
+    <div id="paginationTop" class="pagination"></div>
+  </div>
 
   <div class="list">
     <div class="list-head">
@@ -128,6 +146,7 @@ body{ padding:24px; display:flex; justify-content:center; }
     </div>
     <div id="rows"></div>
   </div>
+  <div class="pagination-container"><div id="paginationBottom" class="pagination"></div></div>
 
 </div>
 
@@ -137,8 +156,10 @@ body{ padding:24px; display:flex; justify-content:center; }
 // 範例資料
 const data = [
   {id:'DIO001',county:'台北市',town:'內湖區',name:'主機A',intensity:'5弱', type:'模擬', time:'2025-12-21 11:30:15'},
-  {id:'DIO002',county:'新北市',town:'板橋區',name:'主機B',intensity:'4級', type:'真實', time:'2025-12-20 08:15:42'},
-  {id:'DIO003',county:'高雄市',town:'左營區',name:'主機C',intensity:'6弱', type:'模擬', time:'2025-12-18 22:45:10'}
+  {id:'DIO002',county:'新北市',town:'板橋區',name:'主機B',intensity:'4級', type:'地震速報', time:'2025-12-20 08:15:42'},
+  {id:'DIO003',county:'高雄市',town:'左營區',name:'主機C',intensity:'6弱', type:'模擬', time:'2025-12-18 22:45:10'},
+  {id:'DIO004',county:'台北市',town:'大安區',name:'主機D',intensity:'5強', type:'地震速報', time:'2025-12-19 10:12:33'},
+  {id:'DIO005',county:'新北市',town:'新店區',name:'主機E',intensity:'3級', type:'模擬', time:'2025-12-17 14:22:50'}
 ];
 
 // 縣市->鄉鎮對應
@@ -154,8 +175,6 @@ const townSelect=document.getElementById('townSelect');
 countySelect.innerHTML='<option value="-">-</option>';
 Object.keys(counties).forEach(c=>countySelect.innerHTML+=`<option>${c}</option>`);
 townSelect.innerHTML='<option value="-">-</option>';
-
-// 選擇縣市時更新鄉鎮
 countySelect.onchange=()=>{
   townSelect.innerHTML='<option value="-">-</option>';
   (counties[countySelect.value]||[]).forEach(t=>{
@@ -163,31 +182,22 @@ countySelect.onchange=()=>{
   });
 };
 
-// 渲染列表
-function render(list){
-  const rows=document.getElementById('rows');
-  rows.innerHTML='';
-  document.getElementById('countText').textContent=`共 ${list.length} 筆資料`;
-  if(!list.length){ rows.innerHTML='<div class="empty">查無資料</div>'; return; }
-  list.forEach((r,i)=>{
-    rows.innerHTML+=`
-      <div class="list-row">
-        <div class="col-1">${i+1}</div>
-        <div class="col-2">${r.id}</div>
-        <div class="col-3">${r.county}</div>
-        <div class="col-4">${r.town}</div>
-        <div class="col-5">${r.name}</div>
-        <div class="col-6">${r.intensity}</div>
-        <div class="col-7">${r.type}</div>
-        <div class="col-8">${r.time}</div>
-      </div>`;
-  });
-}
+// 分頁變數
+let currentPage = 1;
+let pageSize = parseInt(document.getElementById('pageSizeSelect').value);
+let filteredData = data.slice();
 
-// 搜尋功能（比對日期只取 YYYY-MM-DD）
+// 改變每頁筆數
+document.getElementById('pageSizeSelect').addEventListener('change', ()=>{
+  pageSize = parseInt(document.getElementById('pageSizeSelect').value);
+  currentPage = 1;
+  render(filteredData);
+});
+
+// 搜尋功能
 function search(){
-  let list=data.filter(r=>{
-    const rDate=r.time.slice(0,10); // YYYY-MM-DD
+  filteredData = data.filter(r=>{
+    const rDate=r.time.slice(0,10); 
     if(countySelect.value!='-' && r.county!=countySelect.value) return false;
     if(townSelect.value!='-' && r.town!=townSelect.value) return false;
     if(intensitySelect.value!='-' && r.intensity!=intensitySelect.value) return false;
@@ -198,15 +208,86 @@ function search(){
     if(endDate.value && rDate>endDate.value) return false;
     return true;
   });
-  render(list);
+  currentPage = 1;
+  render(filteredData);
+}
+
+// 渲染列表與分頁
+function render(list){
+  const rows=document.getElementById('rows');
+  rows.innerHTML='';
+  document.getElementById('totalCount').textContent=`共 ${list.length} 筆資料`;
+  if(!list.length){ rows.innerHTML='<div class="empty">查無資料</div>'; 
+    document.getElementById('paginationTop').innerHTML='';
+    document.getElementById('paginationBottom').innerHTML='';
+    return;
+  }
+
+  // 顯示當前頁資料
+  const start = (currentPage-1)*pageSize;
+  const end = start + pageSize;
+  list.slice(start,end).forEach((r,i)=>{
+    rows.innerHTML+=`
+      <div class="list-row">
+        <div class="col-1">${start+i+1}</div>
+        <div class="col-2">${r.id}</div>
+        <div class="col-3">${r.county}</div>
+        <div class="col-4">${r.town}</div>
+        <div class="col-5">${r.name}</div>
+        <div class="col-6">${r.intensity}</div>
+        <div class="col-7">${r.type}</div>
+        <div class="col-8">${r.time}</div>
+      </div>`;
+  });
+
+  renderPagination(list.length);
+}
+
+// 分頁渲染
+function renderPagination(total){
+  const totalPages = Math.ceil(total/pageSize);
+  const maxPageButtons = 7;
+  let pages=[];
+  if(totalPages<=maxPageButtons){
+    for(let i=1;i<=totalPages;i++) pages.push(i);
+  } else {
+    if(currentPage<=4){
+      pages=[1,2,3,4,5,'...',totalPages];
+    } else if(currentPage>=totalPages-3){
+      pages=[1,'...',totalPages-4,totalPages-3,totalPages-2,totalPages-1,totalPages];
+    } else {
+      pages=[1,'...',currentPage-1,currentPage,currentPage+1,'...',totalPages];
+    }
+  }
+
+  function createPageHTML(p){ return `<span class="${p===currentPage?'current':''}" onclick="goPage(${p})">${p}</span>`; }
+
+  const paginationTop=document.getElementById('paginationTop');
+  const paginationBottom=document.getElementById('paginationBottom');
+  paginationTop.innerHTML=`<span class="${currentPage===1?'disabled':''}" onclick="goPage(1)">第一頁</span>`;
+  pages.forEach(p=>paginationTop.innerHTML+=p==='...' ? `<span>...</span>` : createPageHTML(p));
+  paginationTop.innerHTML+=`<span class="${currentPage===totalPages?'disabled':''}" onclick="goPage(${totalPages})">最後一頁</span>`;
+
+  paginationBottom.innerHTML=`<span class="${currentPage===1?'disabled':''}" onclick="goPage(${currentPage-1>0?currentPage-1:1})">上一頁</span>`;
+  pages.forEach(p=>paginationBottom.innerHTML+=p==='...' ? `<span>...</span>` : createPageHTML(p));
+  paginationBottom.innerHTML+=`<span class="${currentPage===totalPages?'disabled':''}" onclick="goPage(${currentPage+1<=totalPages?currentPage+1:totalPages})">下一頁</span>`;
+}
+
+function goPage(p){
+  const totalPages = Math.ceil(filteredData.length/pageSize);
+  if(p<1) p=1;
+  if(p>totalPages) p=totalPages;
+  currentPage = p;
+  render(filteredData);
 }
 
 // 初始化
-render(data);
+render(filteredData);
 
-// TOP 按鈕顯示
+// TOP 按鈕
 const topBtn=document.getElementById('topBtn');
 window.onscroll=()=>topBtn.style.display=scrollY>120?'flex':'none';
 </script>
 </body>
 </html>
+

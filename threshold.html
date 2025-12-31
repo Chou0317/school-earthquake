@@ -19,8 +19,9 @@
 
 html,body{height:100%;margin:0;background:var(--bg);}
 body{padding:24px;display:flex;justify-content:center;}
-.card{width:100%;max-width:1000px;background:var(--card);border-radius:0;box-shadow:var(--shadow);overflow:hidden;}
+.card{width:100%;max-width:1300px;background:var(--card);border-radius:0;box-shadow:var(--shadow);overflow:hidden; display:flex; flex-direction:column; height:95vh;}
 .header{padding:16px 20px;background:var(--primary);color:#fff;font-size:20px;font-weight:600;}
+
 .search-row{display:flex;gap:12px;align-items:center;padding:12px 20px;background:#f9fafb;flex-wrap:wrap;}
 .search-row label{color:var(--muted);font-weight:500;}
 .search-row select{height:32px;padding:4px 8px;border-radius:6px;border:1px solid #ccc;}
@@ -36,28 +37,39 @@ body{padding:24px;display:flex;justify-content:center;}
     font-size:14px;
     cursor:pointer;
 }
-.count{padding:8px 20px;color:var(--muted);}
+
+.count{
+  padding:8px 20px;
+  color:var(--muted);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.list-wrapper{flex:1; overflow-y:auto;}
 .list{border-top:1px solid #eee;}
 .list-head,
 .list-row{display:flex;gap:12px;}
-.list-head{background:#f9fafb;font-weight:700;color:var(--muted);}
+.list-head {
+  background:#f9fafb;
+  font-weight:700;
+  color:var(--muted);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
 .list-head div,
 .list-row div {
     text-align:center;
     display:flex;
-    align-items:center;   /* 垂直置中 */
+    align-items:center;
     justify-content:center;
-    height:40px;          /* 固定高度，讓標題與內容對齊 */
+    height:40px;
 }
 .list-row{border-top:1px solid #f2f2f2;line-height:1.2;}
-.col-1{width:50px;}
-.col-2{width:120px;}
-.col-3{width:100px;}
-.col-4{width:120px;}
-.col-5{flex:1;}
-.col-6{width:110px;}
-.col-7{width:120px;}
-.col-8{width:120px;}
+.col-1 { width:50px; }       /* 序號固定 */
+.col-2, .col-3, .col-4, .col-5, .col-6, .col-7 { flex:1; min-width:80px; } /* 中間欄位平均 */
+.col-8 { width:120px; }      /* 操作固定 */
 .icon-btn{padding:6px 10px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;}
 .empty{padding:28px;text-align:center;color:var(--muted);}
 
@@ -73,6 +85,12 @@ body{padding:24px;display:flex;justify-content:center;}
 .modal-body input[disabled]{background:#f3f4f6;}
 
 #topBtn{position:fixed;right:20px;bottom:20px;width:44px;height:44px;border:none;border-radius:8px;background:var(--primary-light);color:#fff;display:none;cursor:pointer;z-index:200;}
+
+.pagination{ display:flex; gap:4px; flex-wrap:wrap; }
+.pagination span{ cursor:pointer; padding:3px 5px; color:var(--primary); font-weight:600; font-size:12px; }
+.pagination span.current{ font-weight:700; text-decoration:underline; cursor:default; color:#111; }
+.pagination span.disabled{ color:#999; cursor:default; }
+.pagination-container{ display:flex; justify-content:center; padding:8px 0; }
 </style>
 </head>
 
@@ -86,25 +104,38 @@ body{padding:24px;display:flex;justify-content:center;}
     <select id="citySelect"></select>
     <label>鄉鎮</label>
     <select id="townSelect"></select>
+    <div class="form-group">
+      <label>每頁筆數</label>
+      <select id="pageSizeSelect">
+        <option>25</option><option>50</option><option>75</option><option>100</option>
+      </select>
+    </div>
     <button class="btn-search" onclick="search()">搜尋</button>
   </div>
 
-  <div class="count" id="countText">共 0 筆資料</div>
+  <div class="count" id="countText">
+    <div id="totalCount">共 0 筆資料</div>
+    <div id="paginationTop" class="pagination"></div>
+  </div>
 
   <!-- 列表 -->
-  <div class="list">
-    <div class="list-head">
-      <div class="col-1">序號</div>
-      <div class="col-2">ID</div>
-      <div class="col-3">縣市</div>
-      <div class="col-4">鄉鎮</div>
-      <div class="col-5">案場名稱</div>
-      <div class="col-6">發報門檻</div>
-      <div class="col-7">發報時間</div>
-      <div class="col-8">操作</div>
+  <div class="list-wrapper">
+    <div class="list">
+      <div class="list-head">
+        <div class="col-1">序號</div>
+        <div class="col-2">ID</div>
+        <div class="col-3">縣市</div>
+        <div class="col-4">鄉鎮</div>
+        <div class="col-5">案場名稱</div>
+        <div class="col-6">發報門檻</div>
+        <div class="col-7">發報時間</div>
+        <div class="col-8">操作</div>
+      </div>
+      <div id="rows"></div>
     </div>
-    <div id="rows"></div>
   </div>
+
+  <div class="pagination-container"><div id="paginationBottom" class="pagination"></div></div>
 </div>
 
 <!-- 發報設定 Modal -->
@@ -146,26 +177,26 @@ body{padding:24px;display:flex;justify-content:center;}
 
 <script>
 /* ===== 假資料 ===== */
-const data=[
- {id:'A001',city:'台北市',town:'內湖區',name:'主機一',threshold:'5弱',start:'08:00',end:'18:00'},
- {id:'A002',city:'新北市',town:'板橋區',name:'主機二',threshold:'6弱',start:'00:00',end:'23:59'},
- {id:'A003',city:'台北市',town:'大安區',name:'主機三',threshold:'4',start:'09:00',end:'17:30'}
-];
+const data=[];
+const cities=['台北市','新北市','台中市','高雄市'];
+for(let i=1;i<=200;i++){
+  const city=cities[i%cities.length];
+  const town='區'+(i%10+1);
+  const threshold=['1','2','3','4','5弱','5強','6弱','6強','7'][i%9];
+  const startH=('0'+(i%24)).slice(-2);
+  const startM=('0'+(i%60)).slice(-2);
+  const endH=('0'+((i+8)%24)).slice(-2);
+  const endM=('0'+((i+30)%60)).slice(-2);
+  data.push({id:'A'+('000'+i).slice(-3), city, town, name:'主機'+i, threshold, start:startH+':'+startM, end:endH+':'+endM});
+}
 
-const cityTown={'台北市':['內湖區','大安區'],'新北市':['板橋區','新店區']};
+const cityTown={'台北市':['內湖','大安'],'新北市':['板橋','新店'],'台中市':['西屯','北區'],'高雄市':['鼓山','左營']};
 let currentSetting=null;
-
-/* ===== 下拉初始化 ===== */
 const citySel=document.getElementById('citySelect');
 const townSel=document.getElementById('townSelect');
 citySel.innerHTML='<option value="-">-</option>';
-Object.keys(cityTown).forEach(c=>{
- citySel.innerHTML+=`<option>${c}</option>`;
-});
-citySel.onchange=()=>{
- townSel.innerHTML='<option value="-">-</option>';
- (cityTown[citySel.value]||[]).forEach(t=>{townSel.innerHTML+=`<option>${t}</option>`;});
-};
+Object.keys(cityTown).forEach(c=>{citySel.innerHTML+=`<option>${c}</option>`;});
+citySel.onchange=()=>{ townSel.innerHTML='<option value="-">-</option>'; (cityTown[citySel.value]||[]).forEach(t=>{townSel.innerHTML+=`<option>${t}</option>`;}); };
 
 /* ===== 時間選單 ===== */
 function initTimeSelect(){
@@ -174,57 +205,102 @@ function initTimeSelect(){
 }
 initTimeSelect();
 
-/* ===== 渲染列表 ===== */
+/* ===== 分頁 ===== */
+let currentPage=1;
+let pageSize=parseInt(document.getElementById('pageSizeSelect').value);
+let filteredData=data.slice();
+
 function render(list){
- const rows=document.getElementById('rows');
- rows.innerHTML='';
- document.getElementById('countText').textContent=`共 ${list.length} 筆資料`;
+  const rows=document.getElementById('rows');
+  rows.innerHTML='';
+  document.getElementById('totalCount').textContent=`共 ${list.length} 筆資料`;
 
- if(!list.length){rows.innerHTML='<div class="empty">查無資料</div>'; return;}
+  renderPagination(list.length);
 
- list.forEach((e,i)=>{
-  rows.innerHTML+=`
-  <div class="list-row">
-    <div class="col-1">${i+1}</div>
-    <div class="col-2">${e.id}</div>
-    <div class="col-3">${e.city}</div>
-    <div class="col-4">${e.town}</div>
-    <div class="col-5">${e.name}</div>
-    <div class="col-6">${e.threshold}</div>
-    <div class="col-7">${e.start}～${e.end}</div>
-    <div class="col-8">
-      <button class="icon-btn" onclick="openSetting('${e.id}')">發報設定</button>
-    </div>
-  </div>`;
- });
+  const start=(currentPage-1)*pageSize;
+  const end=start+pageSize;
+  const pageData=list.slice(start,end);
+  if(!pageData.length){ rows.innerHTML='<div class="empty">查無資料</div>'; return; }
+
+  pageData.forEach((e,i)=>{
+    rows.innerHTML+=`
+      <div class="list-row">
+        <div class="col-1">${start+i+1}</div>
+        <div class="col-2">${e.id}</div>
+        <div class="col-3">${e.city}</div>
+        <div class="col-4">${e.town}</div>
+        <div class="col-5">${e.name}</div>
+        <div class="col-6">${e.threshold}</div>
+        <div class="col-7">${e.start}～${e.end}</div>
+        <div class="col-8"><button class="icon-btn" onclick="openSetting('${e.id}')">發報設定</button></div>
+      </div>`;
+  });
 }
 
 /* ===== 搜尋 ===== */
 function search(){
- const c=citySel.value,t=townSel.value;
- const f=data.filter(e=>(c=='-'||e.city==c)&&(t=='-'||e.town==t));
- render(f);
+  const c=citySel.value,t=townSel.value;
+  filteredData=data.filter(e=>(c=='-'||e.city==c)&&(t=='-'||e.town==t));
+  currentPage=1;
+  render(filteredData);
 }
+
+document.getElementById('pageSizeSelect').addEventListener('change',()=>{
+  pageSize=parseInt(document.getElementById('pageSizeSelect').value);
+  currentPage=1;
+  render(filteredData);
+});
+
+/* ===== 分頁按鈕 ===== */
+function renderPagination(total){
+  const totalPages=Math.ceil(total/pageSize);
+  const maxPageButtons=5;
+  let pages=[];
+  if(totalPages<=maxPageButtons){
+    for(let i=1;i<=totalPages;i++) pages.push(i);
+  }else{
+    if(currentPage<=2){ pages=[1,2,3,'...',totalPages]; }
+    else if(currentPage>=totalPages-1){ pages=[1,'...',totalPages-2,totalPages-1,totalPages]; }
+    else{ pages=[1,'...',currentPage-1,currentPage,currentPage+1,'...',totalPages]; }
+  }
+
+  const paginationTop=document.getElementById('paginationTop');
+  const paginationBottom=document.getElementById('paginationBottom');
+
+  function createHTML(p){ if(p===currentPage) return `<span class="current">${p}</span>`; return `<span onclick="goPage(${p})">${p}</span>`; }
+
+  // 上方
+  paginationTop.innerHTML='';
+  paginationTop.innerHTML+=`<span class="${currentPage===1?'disabled':''}" onclick="${currentPage===1?'':`goPage(1)` }">第一頁</span>`;
+  pages.forEach(p=>{ paginationTop.innerHTML+=p==='...' ? `<span>...</span>` : createHTML(p); });
+  paginationTop.innerHTML+=`<span class="${currentPage===totalPages?'disabled':''}" onclick="${currentPage===totalPages?'':`goPage(${totalPages})`}">最後一頁</span>`;
+
+  // 下方
+  paginationBottom.innerHTML='';
+  paginationBottom.innerHTML+=`<span class="${currentPage===1?'disabled':''}" onclick="${currentPage===1?'':`goPage(${currentPage-1>0?currentPage-1:1})`}">上一頁</span>`;
+  pages.forEach(p=>{ paginationBottom.innerHTML+=p==='...' ? `<span>...</span>` : createHTML(p); });
+  paginationBottom.innerHTML+=`<span class="${currentPage===totalPages?'disabled':''}" onclick="${currentPage===totalPages?'':`goPage(${currentPage+1<=totalPages?currentPage+1:totalPages})`}">下一頁</span>`;
+}
+
+function goPage(p){ const totalPages=Math.ceil(filteredData.length/pageSize); if(p<1)p=1;if(p>totalPages)p=totalPages; currentPage=p; render(filteredData); }
 
 /* ===== 發報設定 ===== */
 function openSetting(id){
- const e=data.find(x=>x.id===id); if(!e) return;
- currentSetting=e;
- setId.value=e.id;
- setThreshold.value=e.threshold;
- const [sh,sm]=e.start.split(':'); const [eh,em]=e.end.split(':');
- startH.value=sh; startM.value=sm; endH.value=eh; endM.value=em;
- settingModal.style.display='flex';
+  const e=data.find(x=>x.id===id); if(!e) return;
+  currentSetting=e;
+  setId.value=e.id;
+  setThreshold.value=e.threshold;
+  const [sh,sm]=e.start.split(':'); const [eh,em]=e.end.split(':');
+  startH.value=sh; startM.value=sm; endH.value=eh; endM.value=em;
+  settingModal.style.display='flex';
 }
-
 function saveSetting(){
- currentSetting.threshold=setThreshold.value;
- currentSetting.start=`${startH.value}:${startM.value}`;
- currentSetting.end=`${endH.value}:${endM.value}`;
- closeSetting();
- render(data);
+  currentSetting.threshold=setThreshold.value;
+  currentSetting.start=`${startH.value}:${startM.value}`;
+  currentSetting.end=`${endH.value}:${endM.value}`;
+  closeSetting();
+  render(filteredData);
 }
-
 function closeSetting(){settingModal.style.display='none';}
 
 /* ===== TOP ===== */
@@ -233,7 +309,8 @@ window.addEventListener('scroll',()=>{topBtn.style.display=window.scrollY>120?'b
 function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'});}
 
 /* ===== init ===== */
-render(data);
+render(filteredData);
+
 </script>
 </body>
 </html>

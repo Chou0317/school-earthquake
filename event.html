@@ -16,10 +16,10 @@
   --radius:12px;
   font-family:-apple-system, BlinkMacSystemFont,'Segoe UI', Roboto,'Noto Sans TC','Microsoft JhengHei',sans-serif;
 }
-html,body{ height:100%; margin:0; background:var(--bg); }
+
+html,body{ height:100%; margin:0; background:var(--bg);}
 body{ padding:24px; display:flex; justify-content:center; }
-.card{ width:100%; max-width:980px; background:var(--card); border-radius:0; 
-  box-shadow:var(--shadow); overflow:hidden; display:flex; flex-direction:column; height:95vh; }
+.card{ width:100%; max-width:1300px; background:var(--card); border-radius:0; box-shadow:var(--shadow); overflow:hidden; display:flex; flex-direction:column; height:95vh;}
 .header{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 20px; background:var(--primary); color:white; }
 .title{ font-size:20px; font-weight:600; }
 .search-row { display:flex; align-items:center; gap:12px; padding:12px 20px; background:#f9fafb; border-radius:8px; margin:0 16px 12px 16px; flex-wrap:wrap; }
@@ -27,64 +27,62 @@ body{ padding:24px; display:flex; justify-content:center; }
 .search-row label{ font-size:15px; font-weight:500; color:var(--muted); white-space:nowrap; line-height:32px; }
 .search-row input[type=date], .search-row select{ height:32px; padding:4px 8px; border-radius:6px; border:1px solid #ccc; font-size:14px; background:#fff; }
 .btn-search{ height:32px; padding:0 14px; border-radius:6px; background:var(--primary-light); color:#fff; border:none; cursor:pointer; font-weight:600; font-size:14px; display:flex; align-items:center; justify-content:center; }
-#countText{ padding:8px 20px; color:var(--muted); }
+#countText{ padding:8px 20px; color:var(--muted); display:flex; justify-content:space-between; align-items:center; }
 .list-wrapper{ flex:1; overflow-y:auto; }
 .list{ width:100%; border-top:1px solid #eee; border-bottom:1px solid #eee; margin-top:0; }
-.list-head{ display:flex; gap:12px; padding:10px 8px; align-items:center; color:var(--muted); font-weight:700; background:#f9fafb; position:sticky; top:0; z-index:2; }
-.list-row{ display:flex; align-items:center; gap:12px; padding:12px 8px; border-bottom:1px solid #f2f2f2; }
-.col-1{ width:60px; flex-shrink:0; text-align:center; color:var(--muted); }
-.col-2,.col-3{ flex:1; min-width:140px; }
-.col-4{ width:100px; flex-shrink:0; text-align:center; } /* 震央向左靠近芮氏規模 */
-.col-5{ width:120px; flex-shrink:0; text-align:center; }
-.col-6{ width:90px; flex-shrink:0; text-align:center; }
+.list-head{ display:flex; padding:10px 8px; align-items:center; color:var(--muted); font-weight:700; background:#f9fafb; position:sticky; top:0; z-index:2; }
+.list-row{ display:flex; align-items:center; padding:12px 8px; border-bottom:1px solid #f2f2f2; }
+.col-1{ flex:0 0 60px; text-align:center; color:var(--muted); }
+.col-2{ flex:1; text-align:center; min-width:120px; }
+.col-3{ flex:1; text-align:center; min-width:120px; }
+.col-4{ flex:1; text-align:center; min-width:120px; }
+.col-5{ flex:1; text-align:center; min-width:120px; }
+.col-6{ flex:0 0 90px; text-align:center; }
 .icon-btn{ padding:6px 8px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); background:transparent; cursor:pointer; font-weight:600; }
 .empty{ padding:28px; text-align:center; color:var(--muted); }
-
-/* modal */
 .modal-backdrop{ position:fixed; inset:0; background:rgba(2,6,23,0.45); display:none; align-items:center; justify-content:center; z-index:100; }
 .modal{ background:var(--card); border-radius:var(--radius); padding:16px; max-width:900px; width:95%; box-shadow:var(--shadow); overflow:auto; display:flex; flex-direction:column; gap:12px; }
 .modal-header{ padding-bottom:8px; border-bottom:1px solid #eee; font-size:18px; font-weight:600; color:#111; }
 .modal-body{ display:flex; gap:12px; flex-wrap:wrap; }
 .modal-footer{ display:flex; gap:8px; justify-content:flex-end; padding-top:12px; border-top:1px solid #eee; }
 .btn-close{ height:32px; padding:0 16px; border-radius:6px; border:1px solid #ccc; background:#ffffff; color:#374151; font-weight:600; cursor:pointer; }
-
 #topBtn{ position:fixed; right:20px; bottom:20px; width:44px; height:44px; background:var(--primary-light); color:white; border:none; border-radius:8px; display:none; align-items:center; justify-content:center; cursor:pointer; z-index:200; }
 #topBtn:hover{ background:#0056b3; }
-
-/* 影響區塊樣式 */
 .details-summary{ cursor:pointer; font-weight:600; margin-bottom:4px; }
 .districts span{ background:#f3f4f6; padding:2px 6px; border-radius:4px; margin-right:4px; margin-bottom:4px; display:inline-block; font-size:13px; }
 .area-title{ font-weight:700; margin-top:8px; margin-bottom:4px; }
-@media (max-width:720px){ .list-head{ font-size:13px; } .col-2,.col-3{ min-width:80px; } .search-row{ gap:8px; } }
+.pagination{ display:flex; gap:4px; flex-wrap:wrap; }
+.pagination span{ cursor:pointer; padding:3px 5px; color:var(--primary); font-weight:600; font-size:12px; }
+.pagination span.current{ font-weight:700; text-decoration:underline; cursor:default; color:#111; }
+.pagination span.disabled{ color:#999; cursor:default; }
+.pagination-container{ display:flex; justify-content:center; padding:8px 0; }
+@media (max-width:720px){ .list-head{ font-size:13px; } .col-2,.col-3,.col-4,.col-5{ min-width:80px; } .search-row{ gap:8px; } }
 </style>
 </head>
 <body>
 
 <div class="card">
   <div class="header"><div class="title">事件紀錄</div></div>
-  <!-- 搜尋區 -->
+
   <div class="search-row">
-    <div class="form-group">
-      <label for="magSelect">震度</label>
-      <select id="magSelect">
-        <option value="-">-</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5-">5弱</option>
-        <option value="5+">5強</option>
-        <option value="6-">6弱</option>
-        <option value="6+">6強</option>
-        <option value="7">7</option>
-      </select>
-    </div>
     <div class="form-group"><label for="startDate">開始日期</label><input type="date" id="startDate"></div>
     <div class="form-group"><label for="endDate">結束日期</label><input type="date" id="endDate"></div>
+    <div class="form-group"><label for="pageSizeSelect">每頁筆數</label>
+      <select id="pageSizeSelect">
+        <option>25</option>
+        <option>50</option>
+        <option>75</option>
+        <option>100</option>
+      </select>
+    </div>
     <button class="btn-search" onclick="searchEvents()">搜尋</button>
   </div>
 
-  <div id="countText">共 0 筆資料</div>
+  <div id="countText">
+    <div id="totalCount">共 0 筆資料</div>
+    <div id="paginationTop" class="pagination"></div>
+  </div>
+
   <div class="list-wrapper">
     <div class="list">
       <div class="list-head">
@@ -98,9 +96,9 @@ body{ padding:24px; display:flex; justify-content:center; }
       <div id="rowsContainer"><div class="empty">載入中...</div></div>
     </div>
   </div>
+  <div class="pagination-container"><div id="paginationBottom" class="pagination"></div></div>
 </div>
 
-<!-- modal -->
 <div class="modal-backdrop" id="modalBackdrop">
   <div class="modal">
     <div class="modal-header">事件瀏覽</div>
@@ -114,35 +112,53 @@ body{ padding:24px; display:flex; justify-content:center; }
 <button id="topBtn" onclick="scrollToTop()">TOP</button>
 
 <script>
-// ---------- 假資料 ----------
-let events=[
-  {id:'E20251209A', datetime:'2025-12-09T11:02:15', magnitude:4.2, epicenter:'宜蘭縣 外海', depth:35, lat:24.7, lon:121.9, affected:{'台北市':['內湖區','大安區'],'新北市':['板橋區','新店區']}},
-  {id:'E20251202B', datetime:'2025-12-02T03:12:05', magnitude:3.1, epicenter:'花蓮縣 市區外', depth:18, lat:23.9, lon:121.6, affected:{'花蓮縣':['花蓮市']}},
-  {id:'E20251130C', datetime:'2025-11-30T21:45:00', magnitude:5.5, epicenter:'高雄市 左營區近海', depth:12, lat:22.7, lon:120.3, affected:{'高雄市':['左營區','苓雅區'],'屏東縣':['潮州鎮']}},
-  {id:'E20250215D', datetime:'2025-02-15T09:22:55', magnitude:2.6, epicenter:'台中市 西屯區', depth:8, lat:24.16, lon:120.63, affected:{'台中市':['西屯區']}},
-  {id:'E20191201E', datetime:'2019-12-01T14:10:12', magnitude:3.9, epicenter:'基隆市 外海', depth:28, lat:25.1, lon:121.7, affected:{'基隆市':['中正區']}}
-];
+// ---------- 假資料 300筆 ----------
+let events=[];
+for(let i=1;i<=300;i++){
+  const mag=(Math.random()*5+2).toFixed(1);
+  const dt=new Date(2025,Math.floor(Math.random()*12),Math.floor(Math.random()*28)+1,Math.floor(Math.random()*24),Math.floor(Math.random()*60),Math.floor(Math.random()*60));
+  const lat=22+Math.random()*3;
+  const lon=120+Math.random()*2;
+  const counties=['台北市','新北市','台中市','高雄市','台南市','花蓮縣'];
+  const affected={};
+  counties.forEach(c=>{affected[c]=['內湖區','大安區']});
+  events.push({id:'E'+String(i).padStart(3,'0'), datetime:dt.toISOString(), magnitude:parseFloat(mag), epicenter:'縣市 '+i, depth:Math.floor(Math.random()*50), lat, lon, affected});
+}
 events.sort((a,b)=>new Date(b.datetime)-new Date(a.datetime));
 
 const rowsContainer=document.getElementById('rowsContainer');
-const countText=document.getElementById('countText');
+const totalCount=document.getElementById('totalCount');
+const paginationTop=document.getElementById('paginationTop');
+const paginationBottom=document.getElementById('paginationBottom');
 const modalBackdrop=document.getElementById('modalBackdrop');
 const modalBody=document.getElementById('modalBody');
+
+let currentPage=1;
+let pageSize=parseInt(document.getElementById('pageSizeSelect').value);
+let filteredEvents=events.slice();
 
 function render(list){
   rowsContainer.innerHTML='';
   if(!list||list.length===0){ 
     rowsContainer.innerHTML='<div class="empty">查無資料</div>'; 
-    countText.textContent='共 0 筆資料'; 
+    totalCount.textContent='共 0 筆資料';
+    paginationTop.innerHTML='';
+    paginationBottom.innerHTML='';
     return;
   }
-  countText.textContent='共 '+list.length+' 筆資料';
-  list.forEach((e,idx)=>{
+  totalCount.textContent='共 '+list.length+' 筆資料';
+  renderPagination(list.length);
+
+  const start=(currentPage-1)*pageSize;
+  const end=start+pageSize;
+  const pageData=list.slice(start,end);
+
+  pageData.forEach((e,idx)=>{
     const dt=new Date(e.datetime);
     const row=document.createElement('div'); 
     row.className='list-row';
     row.innerHTML=`
-      <div class="col-1">${idx+1}</div>
+      <div class="col-1">${start+idx+1}</div>
       <div class="col-2">${formatDateTime(dt)}</div>
       <div class="col-3">${e.magnitude.toFixed(1)}</div>
       <div class="col-4">${escapeHtml(e.epicenter)}</div>
@@ -164,27 +180,79 @@ function formatDateTime(d){
 }
 function escapeHtml(s){return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;');}
 
+document.getElementById('pageSizeSelect').addEventListener('change',()=>{
+  pageSize=parseInt(document.getElementById('pageSizeSelect').value);
+  currentPage=1;
+  render(filteredEvents);
+});
+
 function searchEvents(){
-  const magVal=document.getElementById('magSelect').value;
   const startDate=document.getElementById('startDate').value;
   const endDate=document.getElementById('endDate').value;
-  let filtered = events.slice();
-  if(magVal!='-'){
-    let minMag=parseFloat(magVal.replace(/[^\d.]/g,''));
-    filtered=filtered.filter(e=>e.magnitude>=minMag);
-  }
-  if(startDate) filtered=filtered.filter(e=>e.datetime.slice(0,10)>=startDate);
-  if(endDate) filtered=filtered.filter(e=>e.datetime.slice(0,10)<=endDate);
-  filtered.sort((a,b)=>new Date(b.datetime)-new Date(a.datetime));
-  render(filtered);
+  filteredEvents=events.slice();
+  if(startDate) filteredEvents=filteredEvents.filter(e=>e.datetime.slice(0,10)>=startDate);
+  if(endDate) filteredEvents=filteredEvents.filter(e=>e.datetime.slice(0,10)<=endDate);
+  filteredEvents.sort((a,b)=>new Date(b.datetime)-new Date(a.datetime));
+  currentPage=1;
+  render(filteredEvents);
 }
 
+// -------- 分頁 --------
+function renderPagination(total){
+  const totalPages=Math.ceil(total/pageSize);
+  const maxPageButtons=7;
+  let pages=[];
+
+  if(totalPages<=maxPageButtons){
+    for(let i=1;i<=totalPages;i++) pages.push(i);
+  }else{
+    if(currentPage<=4){
+      pages=[1,2,3,4,5,'...',totalPages];
+    }else if(currentPage>=totalPages-3){
+      pages=[1,'...',totalPages-4,totalPages-3,totalPages-2,totalPages-1,totalPages];
+    }else{
+      pages=[1,'...',currentPage-1,currentPage,currentPage+1,'...',totalPages];
+    }
+  }
+
+  function createPageHTML(p){
+    if(p===currentPage) return `<span class="current">${p}</span>`;
+    return `<span onclick="goPage(${p})">${p}</span>`;
+  }
+
+  // 上方
+  paginationTop.innerHTML='';
+  paginationTop.innerHTML += `<span class="${currentPage===1?'disabled':''}" onclick="${currentPage===1?'':`goPage(1)` }">第一頁</span>`;
+  pages.forEach(p=>{
+    if(p==='...') paginationTop.innerHTML+=`<span>...</span>`;
+    else paginationTop.innerHTML+=createPageHTML(p);
+  });
+  paginationTop.innerHTML += `<span class="${currentPage===totalPages?'disabled':''}" onclick="${currentPage===totalPages?'':`goPage(${totalPages})`}">最後一頁</span>`;
+
+  // 下方
+  paginationBottom.innerHTML='';
+  paginationBottom.innerHTML += `<span class="${currentPage===1?'disabled':''}" onclick="${currentPage===1?'':`goPage(${currentPage-1>0?currentPage-1:1})`}">上一頁</span>`;
+  pages.forEach(p=>{
+    if(p==='...') paginationBottom.innerHTML+=`<span>...</span>`;
+    else paginationBottom.innerHTML+=createPageHTML(p);
+  });
+  paginationBottom.innerHTML += `<span class="${currentPage===totalPages?'disabled':''}" onclick="${currentPage===totalPages?'':`goPage(${currentPage+1<=totalPages?currentPage+1:totalPages})`}">下一頁</span>`;
+}
+
+function goPage(p){
+  const totalPages=Math.ceil(filteredEvents.length/pageSize);
+  if(p<1) p=1;
+  if(p>totalPages) p=totalPages;
+  currentPage=p;
+  render(filteredEvents);
+}
+
+// -------- Modal 瀏覽內容保持不變 --------
 function viewDetail(id){
   const e = events.find(x=>x.id===id);
   if(!e) return alert('找不到事件資料');
   modalBody.innerHTML='';
 
-  // 左側資訊+影響縣市
   const leftDiv=document.createElement('div');
   leftDiv.style.flex='1'; leftDiv.style.minWidth='300px';
   leftDiv.style.display='flex';
@@ -200,7 +268,6 @@ function viewDetail(id){
   `;
   leftDiv.appendChild(infoDiv);
 
-  // 影響縣市
   const regionOrder = { '北部':[], '中部':[], '南部':[], '東部':[] };
   const north=['台北市','新北市','基隆市','桃園市','新竹市','新竹縣','宜蘭縣'];
   const central=['台中市','彰化縣','南投縣','雲林縣','苗栗縣','嘉義市','嘉義縣'];
@@ -242,7 +309,6 @@ function viewDetail(id){
   }
   leftDiv.appendChild(affectedDiv);
 
-  // 右側地圖
   const rightDiv=document.createElement('div');
   rightDiv.style.width='400px';
   rightDiv.style.height='300px';
@@ -263,14 +329,11 @@ function openModal(){ modalBackdrop.style.display='flex'; }
 function closeModal(){ modalBackdrop.style.display='none'; }
 modalBackdrop.addEventListener('click', ev=>{ if(ev.target===modalBackdrop) closeModal(); });
 
-const topBtn=document.getElementById('topBtn');
-window.addEventListener('scroll',()=>{ topBtn.style.display=(window.scrollY>120)?'flex':'none'; });
 function scrollToTop(){ window.scrollTo({top:0,behavior:'smooth'}); }
+window.addEventListener('scroll',()=>{ document.getElementById('topBtn').style.display=(window.scrollY>300)?'flex':'none'; });
 
-render(events);
+render(filteredEvents);
 </script>
 </body>
 </html>
-
-
 

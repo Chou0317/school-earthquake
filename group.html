@@ -21,7 +21,7 @@
 html,body{ height:100%; margin:0; background:var(--bg); }
 body{ padding:24px; display:flex; justify-content:center; }
 
-.card{ width:100%; max-width:920px; background:var(--card); border-radius:0; box-shadow:var(--shadow); overflow:hidden; margin-top:20px; }
+.card{ width:100%; max-width:1300px; background:var(--card); border-radius:0; box-shadow:var(--shadow); overflow:hidden; margin-top:20px; }
 
 .header{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 20px; background:var(--primary); color:white; }
 .title{ font-size:20px; font-weight:600; }
@@ -41,7 +41,7 @@ body{ padding:24px; display:flex; justify-content:center; }
     cursor:pointer;
 }
 
-.list{ width:100%; border-top:1px solid #eee; border-bottom:1px solid #eee; margin-top:0; }
+.list{ width:100%; border-top:1px solid #eee; border-bottom:1px solid #eee; margin-top:0; max-height:400px; overflow:auto; }
 .list-head{ display:flex; gap:12px; padding:10px 8px; align-items:center; color:var(--muted); font-weight:700; background:#f9fafb; }
 .list-row{ display:flex; align-items:center; gap:12px; padding:12px 8px; border-bottom:1px solid #f2f2f2; }
 
@@ -56,7 +56,7 @@ body{ padding:24px; display:flex; justify-content:center; }
 .search-row {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
   padding: 12px 20px;
   background: #f9fafb;
   border-radius: 8px;
@@ -88,6 +88,15 @@ body{ padding:24px; display:flex; justify-content:center; }
   box-sizing: border-box;
 }
 
+.search-row select{
+  width:80px;
+  height:32px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  font-size:14px;
+  padding:2px 6px;
+}
+
 .btn-search{
   height: 32px;
   padding: 0 14px;
@@ -103,10 +112,11 @@ body{ padding:24px; display:flex; justify-content:center; }
   justify-content: center;
 }
 
-@media (max-width:720px){
-  .search-row{ flex-wrap:wrap; gap:12px; }
-  .search-row .form-group input[type="text"]{ width:120px; }
-}
+.pagination{ display:flex; gap:4px; flex-wrap:wrap; }
+.pagination span{ cursor:pointer; padding:3px 5px; color:var(--primary); font-weight:600; font-size:12px; }
+.pagination span.current{ font-weight:700; text-decoration:underline; cursor:default; color:#111; }
+.pagination span.disabled{ color:#999; cursor:default; }
+.pagination-container{ display:flex; justify-content:center; padding:8px 0; }
 
 .modal-backdrop{ position:fixed; inset:0; background:rgba(2,6,23,0.45); display:flex; align-items:center; justify-content:center; z-index:100; }
 .modal{ background:var(--card); border-radius:var(--radius); padding:0; max-width:560px; width:92%; box-shadow:var(--shadow); overflow:hidden; }
@@ -139,16 +149,28 @@ body{ padding:24px; display:flex; justify-content:center; }
     </div>
   </div>
 
-  <!-- 搜尋區 -->
+  <!-- 搜尋列 -->
   <div class="search-row" role="search" aria-label="搜尋群組">
     <div class="form-group">
       <label for="searchName">群組名稱</label>
       <input id="searchName" type="text" placeholder="輸入群組名稱" />
     </div>
+    <div class="form-group"><label>每頁筆數</label>
+    <select id="pageSizeSelect" onchange="changePageSize()">
+      <option value="25">25</option>
+      <option value="50">50</option>
+      <option value="75">75</option>
+      <option value="100">100</option>
+    </select>
+    </div>
     <button class="btn-search" onclick="searchGroup()">搜尋</button>
   </div>
 
-  <div id="countText" style="padding:8px 20px;color:var(--muted)">共 0 筆資料</div>
+  <!-- 頁碼與總筆數（右上） -->
+  <div style="display:flex; justify-content:space-between; padding:0 20px; align-items:center;">
+    <div id="countText" style="color:var(--muted)">共 0 筆資料</div>
+    <div id="topPagination" class="pagination"></div>
+  </div>
 
   <!-- 列表 -->
   <div class="list" aria-live="polite">
@@ -163,6 +185,11 @@ body{ padding:24px; display:flex; justify-content:center; }
     <div id="rowsContainer">
       <div class="empty">目前沒有群組資料</div>
     </div>
+  </div>
+
+  <!-- 頁碼（底部） -->
+  <div id="bottomPagination" class="pagination-container">
+    <div class="pagination"></div>
   </div>
 </div>
 
@@ -207,8 +234,12 @@ body{ padding:24px; display:flex; justify-content:center; }
 <button id="topBtn" onclick="scrollToTop()">TOP</button>
 
 <script>
+// ================= DATA & MODAL =================
 let groups = [];
 let editingId = null;
+let currentPage = 1;
+let pageSize = 25;
+let filteredGroups = [];
 
 const rowsContainer = document.getElementById('rowsContainer');
 const countText = document.getElementById('countText');
@@ -218,34 +249,13 @@ const inputName = document.getElementById('inputName');
 const inputRemark = document.getElementById('inputRemark');
 const siteSelect = document.getElementById('siteSelect');
 const addedSitesDiv = document.getElementById('addedSites');
-
 const cancelBtn = document.getElementById('cancelBtn');
 const saveBtn = document.getElementById('saveBtn');
+const pageSizeSelect = document.getElementById('pageSizeSelect');
+const topPagination = document.getElementById('topPagination');
+const bottomPagination = document.querySelector('#bottomPagination .pagination');
 
-function render(){
-  rowsContainer.innerHTML = '';
-  if(groups.length === 0){
-    rowsContainer.appendChild(Object.assign(document.createElement('div'), { className:'empty', textContent:'目前沒有群組資料' }));
-    countText.textContent = '共 0 筆資料';
-    return;
-  }
-  countText.textContent = '共 ' + groups.length + ' 筆資料';
-  groups.forEach((g, idx) => {
-    const row = document.createElement('div'); row.className = 'list-row';
-    row.innerHTML = `
-      <div class="col-1">${idx+1}</div>
-      <div class="col-2">${escapeHtml(g.name)}</div>
-      <div class="col-3">${escapeHtml(g.remark || '')}</div>
-      <div class="col-4"><button class="icon-btn" onclick="openEdit(${idx})">編輯</button></div>
-      <div class="col-5"><button class="icon-btn" onclick="deleteGroup(${idx})">刪除</button></div>
-      <div class="col-6"><button class="icon-btn" onclick="viewDetail(${idx})">瀏覽</button></div>
-    `;
-    rowsContainer.appendChild(row);
-  });
-}
-
-function escapeHtml(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
-
+// ---------------- MODAL ----------------
 function openModal(){
   editingId = null;
   inputName.value = '';
@@ -284,14 +294,14 @@ function saveGroup(){
     groups.push({ name, remark, sites: joins });
   }
   closeModal();
-  render();
+  searchGroup();
 }
 saveBtn.addEventListener('click', saveGroup);
 
 function openEdit(idx){
-  const g = groups[idx];
+  const g = filteredGroups[idx];
   if(!g) return;
-  editingId = idx;
+  editingId = groups.indexOf(g);
   inputName.value = g.name;
   inputRemark.value = g.remark || '';
   addedSitesDiv.innerHTML = '';
@@ -306,37 +316,33 @@ function openEdit(idx){
 }
 
 function deleteGroup(idx){
+  const g = filteredGroups[idx];
+  if(!g) return;
   if(!confirm('確定刪除此群組？')) return;
-  groups.splice(idx,1);
-  render();
+  groups.splice(groups.indexOf(g),1);
+  searchGroup();
 }
 
-// --- 瀏覽模式完全只讀 ---
+// ---------------- 瀏覽 ----------------
 function viewDetail(idx){
-  const g = groups[idx];
+  const g = filteredGroups[idx];
   if(!g) return;
-
   inputName.value = g.name;
   inputRemark.value = g.remark || '';
   addedSitesDiv.innerHTML = '';
-
   (g.sites || []).forEach(s => {
     const div = document.createElement('div'); 
     div.className = 'site-item';
-    div.innerHTML = `<span>${escapeHtml(s)}</span>`; // 只顯示文字
+    div.innerHTML = `<span>${escapeHtml(s)}</span>`;
     addedSitesDiv.appendChild(div);
   });
-
   document.getElementById('modalTitle').textContent = '群組瀏覽';
   inputName.disabled = true;
   inputRemark.disabled = true;
   siteSelect.disabled = true;
   saveBtn.style.display = 'none';
-
-  // 隱藏加入案場按鈕
   const formRows = addedSitesDiv.parentNode.querySelectorAll('.form-row button, #siteSelect');
   formRows.forEach(el => el.style.display = 'none');
-
   modal.style.display = 'block';
 }
 
@@ -345,40 +351,112 @@ function restoreModalEditable(){
   inputRemark.disabled = false;
   siteSelect.disabled = false;
   saveBtn.style.display = 'inline-block';
-  // 顯示加入案場按鈕
   const formRows = addedSitesDiv.parentNode.querySelectorAll('.form-row button, #siteSelect');
   formRows.forEach(el => el.style.display = 'inline-block');
 }
 
-function searchGroup(){
-  const sname = document.getElementById('searchName').value.trim().toLowerCase();
-  const filtered = groups.filter(g => !sname || g.name.toLowerCase().includes(sname));
+function escapeHtml(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#39;'); }
+
+// ---------------- 分頁 ----------------
+function changePageSize(){
+  pageSize = parseInt(pageSizeSelect.value);
+  currentPage = 1;
+  renderList();
+}
+
+function getPaginatedData(){
+  const start = (currentPage-1)*pageSize;
+  return filteredGroups.slice(start, start+pageSize);
+}
+
+function renderList(){
   rowsContainer.innerHTML = '';
-  if(filtered.length === 0){
+  const data = getPaginatedData();
+  if(data.length===0){
     rowsContainer.appendChild(Object.assign(document.createElement('div'), { className:'empty', textContent:'查無資料' }));
     countText.textContent = '共 0 筆資料';
+    topPagination.innerHTML='';
+    bottomPagination.innerHTML='';
     return;
   }
-  countText.textContent = '共 ' + filtered.length + ' 筆資料';
-  filtered.forEach((g, idx) => {
-    const row = document.createElement('div'); row.className = 'list-row';
-    row.innerHTML = `
-      <div class="col-1">${idx+1}</div>
+  countText.textContent = '共 '+filteredGroups.length+' 筆資料';
+  data.forEach((g,idx)=>{
+    const row = document.createElement('div'); row.className='list-row';
+    row.innerHTML=`
+      <div class="col-1">${(currentPage-1)*pageSize+idx+1}</div>
       <div class="col-2">${escapeHtml(g.name)}</div>
-      <div class="col-3">${escapeHtml(g.remark || '')}</div>
+      <div class="col-3">${escapeHtml(g.remark||'')}</div>
       <div class="col-4"><button class="icon-btn" onclick="openEdit(${idx})">編輯</button></div>
       <div class="col-5"><button class="icon-btn" onclick="deleteGroup(${idx})">刪除</button></div>
       <div class="col-6"><button class="icon-btn" onclick="viewDetail(${idx})">瀏覽</button></div>
     `;
     rowsContainer.appendChild(row);
   });
+  renderPagination();
 }
 
-const topBtn = document.getElementById('topBtn');
-window.addEventListener('scroll', () => { topBtn.style.display = (window.scrollY > 100) ? 'flex' : 'none'; });
-function scrollToTop(){ window.scrollTo({ top: 0, behavior: 'smooth' }); }
+// ---------------- 搜尋 ----------------
+function searchGroup(){
+  const sname = document.getElementById('searchName').value.trim().toLowerCase();
+  filteredGroups = groups.filter(g => !sname || g.name.toLowerCase().includes(sname));
+  currentPage=1;
+  renderList();
+}
 
-render();
+// ---------------- 分頁 DOM ----------------
+function renderPagination(){
+  const totalPages = Math.ceil(filteredGroups.length/pageSize);
+  if(totalPages<=0) { topPagination.innerHTML=''; bottomPagination.innerHTML=''; return; }
+
+  function createPageHTML(page, text, current=false, disabled=false){
+    const span = document.createElement('span');
+    span.textContent = text;
+    if(current) span.className='current';
+    if(disabled) span.className='disabled';
+    else span.addEventListener('click',()=>{ currentPage=page; renderList(); });
+    return span;
+  }
+
+  // 頁碼陣列：右上、底部統一
+  const pages = [];
+  if(totalPages<=5){
+    for(let i=1;i<=totalPages;i++) pages.push(i);
+  } else {
+    pages.push(1);
+    let left = Math.max(2,currentPage-1);
+    let right = Math.min(totalPages-1,currentPage+1);
+    if(left>2) pages.push('...');
+    for(let i=left;i<=right;i++) pages.push(i);
+    if(right<totalPages-1) pages.push('...');
+    pages.push(totalPages);
+  }
+
+  topPagination.innerHTML='';
+  bottomPagination.innerHTML='';
+
+  // 右上：第一頁 / 頁碼 / 最後一頁
+  topPagination.appendChild(createPageHTML(1,'第一頁',false, currentPage===1));
+  pages.forEach(p=>{
+    if(p==='...'){ topPagination.appendChild(createPageHTML(null,'...','disabled')); }
+    else topPagination.appendChild(createPageHTML(p,p,p===currentPage));
+  });
+  topPagination.appendChild(createPageHTML(totalPages,'最後一頁',false, currentPage===totalPages));
+
+  // 底部：上一頁 / 頁碼 / 下一頁
+  bottomPagination.appendChild(createPageHTML(Math.max(1,currentPage-1),'上一頁',false,currentPage===1));
+  pages.forEach(p=>{
+    if(p==='...'){ bottomPagination.appendChild(createPageHTML(null,'...','disabled')); }
+    else bottomPagination.appendChild(createPageHTML(p,p,p===currentPage));
+  });
+  bottomPagination.appendChild(createPageHTML(Math.min(totalPages,currentPage+1),'下一頁',false,currentPage===totalPages));
+}
+
+// ---------------- 回頂部 ----------------
+const topBtn = document.getElementById('topBtn');
+window.addEventListener('scroll',()=>{ topBtn.style.display=(window.scrollY>100)?'flex':'none'; });
+function scrollToTop(){ window.scrollTo({top:0,behavior:'smooth'}); }
+
+searchGroup();
 </script>
 </body>
 </html>
